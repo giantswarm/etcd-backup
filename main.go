@@ -37,23 +37,7 @@ type paramsAWS struct {
 	accessKey string
 	secretKey string
 	bucket    string
-}
-
-type etcdBackupV2 struct {
-	aws     paramsAWS
-	prefix  string
-	fname   string
-	datadir string
-}
-
-type etcdBackupV3 struct {
-	aws       paramsAWS
-	prefix    string
-	fname     string
-	cert      string
-	cacert    string
-	key       string
-	endpoints string
+	region    string
 }
 
 func main() {
@@ -68,6 +52,7 @@ func main() {
 		awsAccessKey    string
 		awsSecretKey    string
 		awsS3Bucket     string
+		awsS3Region     string
 		encryptPassph   string
 	}{}
 
@@ -78,6 +63,7 @@ func main() {
 	flag.StringVar(&flags.etcdV3Key, "etcd-v3-key", "", "Client private key for etcd connection")
 	flag.StringVar(&flags.etcdV3Endpoints, "etcd-v3-endpoints", "http://127.0.0.1:2379", "Endpoints for etcd connection")
 	flag.StringVar(&flags.awsS3Bucket, "aws-s3-bucket", "etcdbackups", "AWS S3 bucket for backups")
+	flag.StringVar(&flags.awsS3Region, "aws-s3-region", "us-east-1", "AWS S3 region for backups")
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
@@ -128,6 +114,7 @@ func main() {
 				accessKey: flags.awsAccessKey,
 				secretKey: flags.awsSecretKey,
 				bucket:    flags.awsS3Bucket,
+				region:    flags.awsS3Region,
 			},
 			prefix:  flags.prefix,
 			datadir: flags.etcdV2DataDir,
@@ -155,6 +142,7 @@ func main() {
 			accessKey: flags.awsAccessKey,
 			secretKey: flags.awsSecretKey,
 			bucket:    flags.awsS3Bucket,
+			region:    flags.awsS3Region,
 		},
 		prefix:    flags.prefix,
 		cert:      flags.etcdV3Cert,

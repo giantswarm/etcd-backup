@@ -3,7 +3,19 @@ package main
 import (
 	"log"
 	"path/filepath"
+
+	microerror "github.com/giantswarm/microkit/error"
 )
+
+type etcdBackupV3 struct {
+	aws       paramsAWS
+	prefix    string
+	fname     string
+	cert      string
+	cacert    string
+	key       string
+	endpoints string
+}
 
 // Create backup in temporary directory
 func (b *etcdBackupV3) create() error {
@@ -28,7 +40,7 @@ func (b *etcdBackupV3) create() error {
 	// Create a backup
 	_, err := execCmd(etcdctlCmd, etcdctlArgs, etcdctlEnvs)
 	if err != nil {
-		return err
+		return microerror.MaskAny(err)
 	}
 
 	log.Print("Etcd v3 backup created successfully")
@@ -47,7 +59,7 @@ func (b *etcdBackupV3) upload() error {
 	// Upload
 	err := uploadToS3(fpath, b.aws)
 	if err != nil {
-		return err
+		return microerror.MaskAny(err)
 	}
 
 	log.Print("Etcd v3 backup uploaded successfully")

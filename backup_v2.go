@@ -5,7 +5,15 @@ import (
 	"path/filepath"
 
 	"github.com/mholt/archiver"
+	microerror "github.com/giantswarm/microkit/error"
 )
+
+type etcdBackupV2 struct {
+	aws     paramsAWS
+	prefix  string
+	fname   string
+	datadir string
+}
 
 // Create backup in temporary directory, tar and compress
 func (b *etcdBackupV2) create() error {
@@ -25,13 +33,13 @@ func (b *etcdBackupV2) create() error {
 
 	_, err := execCmd(etcdctlCmd, etcdctlArgs, etcdctlEnvs)
 	if err != nil {
-		return err
+		return microerror.MaskAny(err)
 	}
 
 	// Create tar.gz
 	err = archiver.TarGz.Make(fpath + tgzExt, []string{fpath})
 	if err != nil {
-		return err
+		return microerror.MaskAny(err)
 	}
 
 	// Update fname in backup object
@@ -53,7 +61,7 @@ func (b *etcdBackupV2) upload() error {
 	// Upload
 	err := uploadToS3(fpath, b.aws)
 	if err != nil {
-		return err
+		return microerror.MaskAny(err)
 	}
 
 	log.Print("Etcd v2 backup uploaded successfully")

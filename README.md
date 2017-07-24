@@ -2,7 +2,7 @@
 
 ## Quickstart with docker
 
-Create etcd V2 and V3 backup and upload to S3
+Create etcd V2 and V3 backup and upload to S3.
 
 ```
 docker run --rm \
@@ -24,7 +24,7 @@ CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' .
 
 ## Usage
 
-By default tool creates only V3 backup and uploads file to AWS S3
+By default tool creates only V3 backup and uploads file to AWS S3.
 
 ```
 export ETCDBACKUP_AWS_ACCESS_KEY=XXX
@@ -33,7 +33,7 @@ export ETCDBACKUP_AWS_SECRET_KEY=YYY
 etcd-backup -aws-s3-bucket bucket -prefix cluster1
 ```
 
-To create both V2 and V3 make sure etcd data directory accessible locally
+To create both V2 and V3 make sure etcd data directory accessible locally.
 
 ```
 etcd-backup -aws-s3-bucket $BUCKET_NAME -prefix $CLUSTER_NAME -etcd-v2-datadir /var/lib/etcd

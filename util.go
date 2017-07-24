@@ -13,6 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	microerror "github.com/giantswarm/microkit/error"
 )
 
 // Outputs timestamp
@@ -37,7 +38,7 @@ func execCmd(cmd string, args []string, envs []string) ([]byte, error) {
 	if err != nil {
 		log.Printf("%s", stdOutErr)
 		log.Print(err)
-		return stdOutErr, err
+		return stdOutErr, microerror.MaskAny(err)
 	}
 	return stdOutErr, nil
 }
@@ -51,22 +52,32 @@ func uploadToS3(fpath string, p paramsAWS) error {
 	creds := credentials.NewStaticCredentials(p.accessKey, p.secretKey, "")
 	_, err := creds.Get()
 	if err != nil {
-		return err
+		return microerror.MaskAny(err)
 	}
-	cfg := aws.NewConfig().WithRegion("us-east-1").WithCredentials(creds)
+	cfg := aws.NewConfig().WithRegion(p.region).WithCredentials(creds)
 	svc := s3.New(session.New(), cfg)
 
 	// Upload
 	file, err := os.Open(fpath)
 	if err != nil {
-		return err
+		return microerror.MaskAny(err)
 	}
 	defer file.Close()
 
+	// Get file size
 	fileInfo, _ := file.Stat()
+	if err != nil {
+		return microerror.MaskAny(err)
+	}
 	size := fileInfo.Size()
-	buffer := make([]byte, size) // read file content to buffer
+
+	// Read file content to buffer
+	buffer := make([]byte, size)
 	file.Read(buffer)
+	if err != nil {
+		return microerror.MaskAny(err)
+	}
+
 	fileBytes := bytes.NewReader(buffer)
 	fileType := http.DetectContentType(buffer)
 	// Get filename without path
@@ -83,7 +94,7 @@ func uploadToS3(fpath string, p paramsAWS) error {
 	// Put object to S3
 	_, err = svc.PutObject(params)
 	if err != nil {
-		return err
+		return microerror.MaskAny(err)
 	}
 
 	log.Printf("AWS S3: object %s successfully uploaded to bucket %s", path, p.bucket)
