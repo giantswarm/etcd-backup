@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bytes"
 	"log"
-	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -16,12 +14,12 @@ import (
 	microerror "github.com/giantswarm/microkit/error"
 )
 
-// Outputs timestamp
+// Outputs timestamp.
 func getTimeStamp() (string) {
 	return time.Now().Format("2006-01-02T15-04-05")
 }
 
-// Executes command and outputs stdout+stderr and error if any
+// Executes command and outputs stdout+stderr and error if any.
 // Arguments:
 // - cmd  - command to execute
 // - args - arguments for command
@@ -29,11 +27,11 @@ func getTimeStamp() (string) {
 func execCmd(cmd string, args []string, envs []string) ([]byte, error) {
 	log.Printf("Executing: %s %v\n", cmd, args)
 
-	// Create cmd and add environment
+	// Create cmd and add environment.
 	c := exec.Command(cmd, args...)
 	c.Env = append(os.Environ(), envs...)
 
-	// Execute and get output
+	// Execute and get output.
 	stdOutErr, err := c.CombinedOutput()
 	if err != nil {
 		log.Printf("%s", stdOutErr)
@@ -43,7 +41,7 @@ func execCmd(cmd string, args []string, envs []string) ([]byte, error) {
 	return stdOutErr, nil
 }
 
-// Uploads file to S3 bucket
+// Uploads file to S3 bucket.
 // Arguments:
 // - fpath - full path to target file
 // - p     - paramsAWS struct with AWS keys and bucket name
@@ -57,41 +55,32 @@ func uploadToS3(fpath string, p paramsAWS) error {
 	cfg := aws.NewConfig().WithRegion(p.region).WithCredentials(creds)
 	svc := s3.New(session.New(), cfg)
 
-	// Upload
+	// Upload.
 	file, err := os.Open(fpath)
 	if err != nil {
 		return microerror.MaskAny(err)
 	}
 	defer file.Close()
 
-	// Get file size
-	fileInfo, _ := file.Stat()
+	// Get file size.
+	fileInfo, err := file.Stat()
 	if err != nil {
 		return microerror.MaskAny(err)
 	}
 	size := fileInfo.Size()
 
-	// Read file content to buffer
-	buffer := make([]byte, size)
-	file.Read(buffer)
-	if err != nil {
-		return microerror.MaskAny(err)
-	}
-
-	fileBytes := bytes.NewReader(buffer)
-	fileType := http.DetectContentType(buffer)
-	// Get filename without path
-	path := filepath.Base(file.Name())
+	// Get filename without path.
+	path := filepath.Base(fileInfo.Name())
 
 	params := &s3.PutObjectInput{
 		Bucket: aws.String(p.bucket),
 		Key: aws.String(path),
-		Body: fileBytes,
+		Body: file,
 		ContentLength: aws.Int64(size),
-		ContentType: aws.String(fileType),
+		ContentType: aws.String("application/octet-stream"),
 	}
 
-	// Put object to S3
+	// Put object to S3.
 	_, err = svc.PutObject(params)
 	if err != nil {
 		return microerror.MaskAny(err)

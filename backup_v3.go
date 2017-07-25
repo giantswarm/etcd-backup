@@ -17,12 +17,12 @@ type etcdBackupV3 struct {
 	endpoints string
 }
 
-// Create backup in temporary directory
+// Create backup in temporary directory.
 func (b *etcdBackupV3) create() error {
 	// Filename
 	b.fname = b.prefix + "-etcd-backup-v3-" + getTimeStamp() + dbExt
 
-	// Full path to file
+	// Full path to file.
 	fpath := filepath.Join(tmpDir, b.fname)
 
 	etcdctlEnvs := []string{"ETCDCTL_API=3"}
@@ -37,7 +37,7 @@ func (b *etcdBackupV3) create() error {
 	if b.cert != "" { etcdctlArgs = append(etcdctlArgs, "--cert", b.cert) }
 	if b.key != "" { etcdctlArgs = append(etcdctlArgs, "--key", b.key) }
 
-	// Create a backup
+	// Create a backup.
 	_, err := execCmd(etcdctlCmd, etcdctlArgs, etcdctlEnvs)
 	if err != nil {
 		return microerror.MaskAny(err)
@@ -52,11 +52,11 @@ func (b *etcdBackupV3) encrypt() error {
 	return nil
 }
 
-// Upload resulted backup to S3
+// Upload resulted backup to S3.
 func (b *etcdBackupV3) upload() error {
 	fpath := filepath.Join(tmpDir, b.fname)
 
-	// Upload
+	// Upload.
 	err := uploadToS3(fpath, b.aws)
 	if err != nil {
 		return microerror.MaskAny(err)

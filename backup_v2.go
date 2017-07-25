@@ -15,15 +15,15 @@ type etcdBackupV2 struct {
 	datadir string
 }
 
-// Create backup in temporary directory, tar and compress
+// Create backup in temporary directory, tar and compress.
 func (b *etcdBackupV2) create() error {
 	// Filename
 	b.fname = b.prefix + "-etcd-backup-v2-" + getTimeStamp()
 
-	// Full path to file
+	// Full path to file.
 	fpath := filepath.Join(tmpDir, b.fname)
 
-	// Create a backup
+	// Create a backup.
 	etcdctlEnvs := []string{}
 	etcdctlArgs := []string{
 		"backup",
@@ -36,13 +36,13 @@ func (b *etcdBackupV2) create() error {
 		return microerror.MaskAny(err)
 	}
 
-	// Create tar.gz
+	// Create tar.gz.
 	err = archiver.TarGz.Make(fpath + tgzExt, []string{fpath})
 	if err != nil {
 		return microerror.MaskAny(err)
 	}
 
-	// Update fname in backup object
+	// Update fname in backup object.
 	b.fname = b.fname + tgzExt
 
 	log.Print("Etcd v2 backup created successfully")
@@ -54,7 +54,7 @@ func (b *etcdBackupV2) encrypt() error {
 	return nil
 }
 
-// Upload resulted backup to S3
+// Upload resulted backup to S3.
 func (b *etcdBackupV2) upload() error {
 	fpath := filepath.Join(tmpDir, b.fname)
 

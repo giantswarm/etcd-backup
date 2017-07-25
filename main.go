@@ -41,7 +41,7 @@ type paramsAWS struct {
 }
 
 func main() {
-	// Initialize parameters
+	// Initialize parameters.
 	flags := struct {
 		prefix          string
 		etcdV2DataDir   string
@@ -80,24 +80,24 @@ func main() {
 	flags.awsSecretKey  = os.Getenv(envAwsSecretKey)
 	flags.encryptPassph = os.Getenv(envEncryptPassph)
 
-	// Validate parameters
-	// Prefix is required
+	// Validate parameters.
+	// Prefix is required.
 	if flags.prefix == "" {
 		log.Fatalf("-prefix required")
 	}
 
-	// AWS is requrement
+	// AWS is requrement.
 	if flags.awsAccessKey == "" || flags.awsSecretKey == "" {
 		log.Fatalf("No environment variables %s and %s provided", envAwsAccessKey, envAwsSecretKey)
 	}
 
-	// Skip V2 backup if not datadir provided
+	// Skip V2 backup if not datadir provided.
 	if flags.etcdV2DataDir == "" {
 		skipV2 = true
 		log.Print("Skipping etcd V2 backup as -etcd-v2-datadir is not set")
 	}
 
-	// Create tempDir where all file related magic happens
+	// Create tempDir where all file related magic happens.
 	var err error
 	tmpDir, err = ioutil.TempDir("", "")
 	if err != nil {
@@ -105,9 +105,9 @@ func main() {
 	}
 	log.Print("Created temporary directory: ", tmpDir)
 
-	defer os.RemoveAll(tmpDir) // clean up after finished
+	defer os.RemoveAll(tmpDir) // clean up after finished.
 
-	// V2 backup
+	// V2 backup.
 	if !skipV2 {
 		v2 := etcdBackupV2{
 			aws:    paramsAWS{
@@ -136,7 +136,7 @@ func main() {
 		}
 	}
 
-	// V3 backup
+	// V3 backup.
 	v3 := etcdBackupV3{
 		aws:    paramsAWS{
 			accessKey: flags.awsAccessKey,
