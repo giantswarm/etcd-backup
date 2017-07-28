@@ -6,10 +6,19 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"runtime"
 )
 
 // TODO:
 // - check etcdctl exists and right version
+
+// Common variables.
+var (
+	description string = "Application to backup etcd."
+	gitCommit   string = "n/a"
+	name        string = "etcd-backup"
+	source      string = "https://github.com/giantswarm/etcd-backup"
+)
 
 const (
 	envAwsAccessKey  = "ETCDBACKUP_AWS_ACCESS_KEY"
@@ -41,6 +50,18 @@ type paramsAWS struct {
 }
 
 func main() {
+	// Print version.
+	// This is only for compatibility until switching to microkit.
+	if (len(os.Args) > 1) && (os.Args[1] == "version") {
+		fmt.Printf("Description:    %s\n", description)
+		fmt.Printf("Git Commit:     %s\n", gitCommit)
+		fmt.Printf("Go Version:     %s\n", runtime.Version())
+		fmt.Printf("Name:           %s\n", name)
+		fmt.Printf("OS / Arch:      %s / %s\n", runtime.GOOS, runtime.GOARCH)
+		fmt.Printf("Source:         %s\n", source)
+		return
+	}
+
 	// Initialize parameters.
 	flags := struct {
 		prefix          string
@@ -54,7 +75,11 @@ func main() {
 		awsS3Bucket     string
 		awsS3Region     string
 		encryptPassph   string
+		help            bool
 	}{}
+
+	// Print flags related messages to stdout instead of stderr.
+	flag.CommandLine.SetOutput(os.Stdout)
 
 	flag.StringVar(&flags.prefix, "prefix", "", "[mandatory] Prefix to use in backup filenames")
 	flag.StringVar(&flags.etcdV2DataDir, "etcd-v2-datadir", "", "Etcd datadir. If not set V2 backup will be skipped")
@@ -64,13 +89,14 @@ func main() {
 	flag.StringVar(&flags.etcdV3Endpoints, "etcd-v3-endpoints", "http://127.0.0.1:2379", "Endpoints for etcd connection")
 	flag.StringVar(&flags.awsS3Bucket, "aws-s3-bucket", "etcdbackups", "AWS S3 bucket for backups")
 	flag.StringVar(&flags.awsS3Region, "aws-s3-region", "us-east-1", "AWS S3 region for backups")
+	flag.BoolVar(&flags.help, "help", false, "Print usage and exit")
 
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
-		fmt.Fprintf(os.Stderr, "\n")
-		fmt.Fprintf(os.Stderr, "  variable %s - [mandatory] AWS access key for S3\n", envAwsAccessKey)
-		fmt.Fprintf(os.Stderr, "  variable %s - [mandatory] AWS secret access key for S3\n", envAwsSecretKey)
-		fmt.Fprintf(os.Stderr, "\n")
+		fmt.Fprintf(os.Stdout, "Usage of %s:\n", os.Args[0])
+		fmt.Fprintf(os.Stdout, "\n")
+		fmt.Fprintf(os.Stdout, "  variable %s - [mandatory] AWS access key for S3\n", envAwsAccessKey)
+		fmt.Fprintf(os.Stdout, "  variable %s - [mandatory] AWS secret access key for S3\n", envAwsSecretKey)
+		fmt.Fprintf(os.Stdout, "\n")
 		flag.PrintDefaults()
 	}
 
@@ -79,6 +105,12 @@ func main() {
 	flags.awsAccessKey = os.Getenv(envAwsAccessKey)
 	flags.awsSecretKey = os.Getenv(envAwsSecretKey)
 	flags.encryptPassph = os.Getenv(envEncryptPassph)
+
+	// Print usage.
+	if flags.help {
+		flag.Usage()
+		return
+	}
 
 	// Validate parameters.
 	// Prefix is required.
