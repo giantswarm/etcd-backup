@@ -28,9 +28,9 @@ var (
 )
 
 type backup interface {
-	create()  error
+	create() error
 	encrypt() error
-	upload()  error
+	upload() error
 }
 
 type paramsAWS struct {
@@ -76,8 +76,8 @@ func main() {
 
 	flag.Parse()
 
-	flags.awsAccessKey  = os.Getenv(envAwsAccessKey)
-	flags.awsSecretKey  = os.Getenv(envAwsSecretKey)
+	flags.awsAccessKey = os.Getenv(envAwsAccessKey)
+	flags.awsSecretKey = os.Getenv(envAwsSecretKey)
 	flags.encryptPassph = os.Getenv(envEncryptPassph)
 
 	// Validate parameters.
@@ -110,7 +110,7 @@ func main() {
 	// V2 backup.
 	if !skipV2 {
 		v2 := etcdBackupV2{
-			aws:    paramsAWS{
+			aws: paramsAWS{
 				accessKey: flags.awsAccessKey,
 				secretKey: flags.awsSecretKey,
 				bucket:    flags.awsS3Bucket,
@@ -138,7 +138,7 @@ func main() {
 
 	// V3 backup.
 	v3 := etcdBackupV3{
-		aws:    paramsAWS{
+		aws: paramsAWS{
 			accessKey: flags.awsAccessKey,
 			secretKey: flags.awsSecretKey,
 			bucket:    flags.awsS3Bucket,
