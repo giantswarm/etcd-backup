@@ -1,0 +1,65 @@
+apiVersion: batch/v2alpha1
+kind: CronJob
+metadata:
+  name: etcd-backup
+  namespace: kube-system
+spec:
+  # Run everyday at 3AM.
+  schedule: "0 3 * * *"
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      # Job timeout
+      activeDeadlineSeconds: 600
+      template:
+        spec:
+          # Container creates etcd backups.
+          # Run container in host network mode on G8s masters
+          # to be able to use 127.0.0.1 as etcd address.
+          # For etcd v2 backups container should have access
+          # to etcd data directory. To achive that,
+          # mount /var/lib/etcd3 as a volume.
+          nodeSelector:
+            role: master
+          containers:
+          - name: etcd-backup
+            image: quay.io/giantswarm/etcd-backup:[[ .SHA ]]
+            args:
+            - -prefix={{ .Values.Installation.V1.Infra.EtcdBackup.ClusterPrefix }}
+            - -etcd-v2-datadir=/var/lib/etcd
+            - -etcd-v3-endpoints=https://127.0.0.1:2379
+            - -etcd-v3-cacert=/certs/etcd-ca.pem
+            - -aws-s3-bucket=etcd-backups.giantswarm.io
+            - -aws-s3-region=eu-west-1
+            volumeMounts:
+            - mountPath: /var/lib/etcd
+              name: etcd-datadir
+            - mountPath: /certs
+              name: etcd-certs
+            env:
+              - name: ETCDBACKUP_AWS_ACCESS_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: etcd-backup
+                    key: ETCDBACKUP_AWS_ACCESS_KEY
+              - name: ETCDBACKUP_AWS_SECRET_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: etcd-backup
+                    key: ETCDBACKUP_AWS_SECRET_KEY
+              - name: ETCDBACKUP_PASSPHRASE
+                valueFrom:
+                  secretKeyRef:
+                    name: etcd-backup
+                    key: ETCDBACKUP_PASSPHRASE
+          volumes:
+          - name: etcd-datadir
+            hostPath:
+              path: /var/lib/etcd3
+          - name: etcd-certs
+            hostPath:
+              path: /etc/giantswarm/g8s/ssl/etcd
+          # Do not restart pod, job takes care on restarting failed pod.
+          restartPolicy: Never
+          hostNetwork: true
