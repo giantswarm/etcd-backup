@@ -32,10 +32,18 @@ func (b *etcdBackupV3) create() error {
 		fpath,
 	}
 
-	if b.endpoints != "" { etcdctlArgs = append(etcdctlArgs, "--endpoints", b.endpoints) }
-	if b.cacert != "" { etcdctlArgs = append(etcdctlArgs, "--cacert", b.cacert) }
-	if b.cert != "" { etcdctlArgs = append(etcdctlArgs, "--cert", b.cert) }
-	if b.key != "" { etcdctlArgs = append(etcdctlArgs, "--key", b.key) }
+	if b.endpoints != "" {
+		etcdctlArgs = append(etcdctlArgs, "--endpoints", b.endpoints)
+	}
+	if b.cacert != "" {
+		etcdctlArgs = append(etcdctlArgs, "--cacert", b.cacert)
+	}
+	if b.cert != "" {
+		etcdctlArgs = append(etcdctlArgs, "--cert", b.cert)
+	}
+	if b.key != "" {
+		etcdctlArgs = append(etcdctlArgs, "--key", b.key)
+	}
 
 	// Create a backup.
 	_, err := execCmd(etcdctlCmd, etcdctlArgs, etcdctlEnvs)
