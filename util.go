@@ -15,7 +15,7 @@ import (
 )
 
 // Outputs timestamp.
-func getTimeStamp() (string) {
+func getTimeStamp() string {
 	return time.Now().Format("2006-01-02T15-04-05")
 }
 
@@ -73,11 +73,11 @@ func uploadToS3(fpath string, p paramsAWS) error {
 	path := filepath.Base(fileInfo.Name())
 
 	params := &s3.PutObjectInput{
-		Bucket: aws.String(p.bucket),
-		Key: aws.String(path),
-		Body: file,
+		Bucket:        aws.String(p.bucket),
+		Key:           aws.String(path),
+		Body:          file,
 		ContentLength: aws.Int64(size),
-		ContentType: aws.String("application/octet-stream"),
+		ContentType:   aws.String("application/octet-stream"),
 	}
 
 	// Put object to S3.

@@ -4,8 +4,8 @@ import (
 	"log"
 	"path/filepath"
 
-	"github.com/mholt/archiver"
 	microerror "github.com/giantswarm/microkit/error"
+	"github.com/mholt/archiver"
 )
 
 type etcdBackupV2 struct {
@@ -28,7 +28,7 @@ func (b *etcdBackupV2) create() error {
 	etcdctlArgs := []string{
 		"backup",
 		"--data-dir", b.datadir,
-		"--backup-dir",  filepath.Join(tmpDir, b.fname),
+		"--backup-dir", filepath.Join(tmpDir, b.fname),
 	}
 
 	_, err := execCmd(etcdctlCmd, etcdctlArgs, etcdctlEnvs)
@@ -37,7 +37,7 @@ func (b *etcdBackupV2) create() error {
 	}
 
 	// Create tar.gz.
-	err = archiver.TarGz.Make(fpath + tgzExt, []string{fpath})
+	err = archiver.TarGz.Make(fpath+tgzExt, []string{fpath})
 	if err != nil {
 		return microerror.MaskAny(err)
 	}
