@@ -13,8 +13,8 @@ test:
   override:
     - ./architect build
 
-#deployment:
-#  master:
-#    branch: master
-#    commands:
-#      - ./architect deploy
+deployment:
+  master:
+    branch: master
+    commands:
+      - ./architect deploy

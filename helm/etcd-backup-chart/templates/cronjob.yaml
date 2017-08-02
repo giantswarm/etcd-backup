@@ -5,7 +5,7 @@ metadata:
   namespace: kube-system
 spec:
   # Run everyday at 3AM.
-  schedule: "0 3 * * *"
+  schedule: "{{ .Values.Installation.V1.Infra.EtcdBackup.CronSchedule }}"
   successfulJobsHistoryLimit: 2
   failedJobsHistoryLimit: 2
   jobTemplate:
@@ -28,10 +28,12 @@ spec:
             args:
             - -prefix={{ .Values.Installation.V1.Infra.EtcdBackup.ClusterPrefix }}
             - -etcd-v2-datadir=/var/lib/etcd
-            - -etcd-v3-endpoints=https://127.0.0.1:2379
-            - -etcd-v3-cacert=/certs/etcd-ca.pem
-            - -aws-s3-bucket=etcd-backups.giantswarm.io
-            - -aws-s3-region=eu-west-1
+            - -etcd-v3-endpoints={{ .Values.Installation.V1.Infra.EtcdBackup.EtcdEndpoints }}
+            - -etcd-v3-cacert=/certs/{{ .Values.Installation.V1.Infra.EtcdBackup.ClientCaCertFileName }}
+            - -etcd-v3-cert=/certs/{{ .Values.Installation.V1.Infra.EtcdBackup.ClientCertFileName }}
+            - -etcd-v3-key=/certs/{{ .Values.Installation.V1.Infra.EtcdBackup.ClientKeyFileName }}
+            - -aws-s3-bucket={{ .Values.Installation.V1.Infra.EtcdBackup.S3Bucket }}
+            - -aws-s3-region={{ .Values.Installation.V1.Infra.EtcdBackup.S3Region }}
             volumeMounts:
             - mountPath: /var/lib/etcd
               name: etcd-datadir
@@ -56,10 +58,10 @@ spec:
           volumes:
           - name: etcd-datadir
             hostPath:
-              path: /var/lib/etcd3
+              path: {{ .Values.Installation.V1.Infra.EtcdBackup.EtcdDataDir }}
           - name: etcd-certs
             hostPath:
-              path: /etc/giantswarm/g8s/ssl/etcd
+              path: {{ .Values.Installation.V1.Infra.EtcdBackup.ClientCertsDir }}
           # Do not restart pod, job takes care on restarting failed pod.
           restartPolicy: Never
           hostNetwork: true
