@@ -66,3 +66,5 @@ spec:
           # Do not restart pod, job takes care on restarting failed pod.
           restartPolicy: Never
           hostNetwork: true
+          imagePullSecrets:
+          - name: etcd-backup-pull-secret
