@@ -24,7 +24,8 @@ spec:
             role: master
           containers:
           - name: etcd-backup
-            image: quay.io/giantswarm/etcd-backup:[[ .SHA ]]
+            # Use latest tag as w/a for https://github.com/giantswarm/architect/issues/135
+            image: quay.io/giantswarm/etcd-backup:latest
             args:
             - -prefix={{ .Values.Installation.V1.Infra.EtcdBackup.ClusterPrefix }}
             - -etcd-v2-datadir=/var/lib/etcd
