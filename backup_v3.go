@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	microerror "github.com/giantswarm/microkit/error"
+	"github.com/mholt/archiver"
 )
 
 type etcdBackupV3 struct {
@@ -50,6 +51,15 @@ func (b *etcdBackupV3) create() error {
 	if err != nil {
 		return microerror.MaskAny(err)
 	}
+
+	// Create tar.gz.
+	err = archiver.TarGz.Make(fpath+tgzExt, []string{fpath})
+	if err != nil {
+		return microerror.MaskAny(err)
+	}
+
+	// Update fname in backup object.
+	b.fname = b.fname + tgzExt
 
 	log.Print("Etcd v3 backup created successfully")
 	return nil
