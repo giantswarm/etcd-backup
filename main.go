@@ -27,7 +27,7 @@ const (
 	etcdctlCmd       = "etcdctl"
 	awsCmd           = "aws"
 	tgzExt           = ".tar.gz"
-	gpgExt           = ".gpg"
+	encExt           = ".enc"
 	dbExt            = ".db"
 )
 
@@ -96,6 +96,7 @@ func main() {
 		fmt.Fprintf(os.Stdout, "\n")
 		fmt.Fprintf(os.Stdout, "  variable %s - [mandatory] AWS access key for S3\n", envAwsAccessKey)
 		fmt.Fprintf(os.Stdout, "  variable %s - [mandatory] AWS secret access key for S3\n", envAwsSecretKey)
+		fmt.Fprintf(os.Stdout, "  variable %s - passphrase for AES encryption\n", envEncryptPassph)
 		fmt.Fprintf(os.Stdout, "\n")
 		flag.PrintDefaults()
 	}
@@ -150,6 +151,7 @@ func main() {
 			},
 			prefix:  flags.prefix,
 			datadir: flags.etcdV2DataDir,
+			encPass: flags.encryptPassph,
 		}
 
 		err = v2.create()
@@ -181,6 +183,7 @@ func main() {
 		cacert:    flags.etcdV3CACert,
 		key:       flags.etcdV3Key,
 		endpoints: flags.etcdV3Endpoints,
+		encPass:   flags.encryptPassph,
 	}
 
 	err = v3.create()
