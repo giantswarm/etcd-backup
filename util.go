@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -12,6 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	microerror "github.com/giantswarm/microkit/error"
+	"golang.org/x/crypto/openpgp"
 )
 
 // Outputs timestamp.
@@ -87,5 +90,44 @@ func uploadToS3(fpath string, p paramsAWS) error {
 	}
 
 	log.Printf("AWS S3: object %s successfully uploaded to bucket %s", path, p.bucket)
+	return nil
+}
+
+// Encrypt data with passphrase.
+func encryptData(value []byte, pass string) (ciphertext []byte, err error) {
+	buf := bytes.NewBuffer(nil)
+
+	encrypter, err := openpgp.SymmetricallyEncrypt(buf, []byte(pass), nil, nil)
+	if err != nil {
+		return nil, microerror.MaskAny(err)
+	}
+
+	_, err = encrypter.Write(value)
+	if err != nil {
+		return nil, microerror.MaskAny(err)
+	}
+
+	encrypter.Close()
+
+	return buf.Bytes(), nil
+}
+
+// Encrypts file from srcPath and writes encrypted data to dstPart.
+func encryptFile(srcPath string, dstPart string, passphrase string) error {
+	data, err := ioutil.ReadFile(srcPath)
+	if err != nil {
+		return microerror.MaskAny(err)
+	}
+
+	encData, err := encryptData(data, passphrase)
+	if err != nil {
+		return microerror.MaskAny(err)
+	}
+
+	err = ioutil.WriteFile(dstPart, encData, os.FileMode(0600))
+	if err != nil {
+		return microerror.MaskAny(err)
+	}
+
 	return nil
 }

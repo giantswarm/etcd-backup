@@ -13,6 +13,7 @@ type etcdBackupV2 struct {
 	prefix  string
 	fname   string
 	datadir string
+	encPass string
 }
 
 // Create backup in temporary directory, tar and compress.
@@ -50,7 +51,24 @@ func (b *etcdBackupV2) create() error {
 }
 
 func (b *etcdBackupV2) encrypt() error {
-	log.Print("Etcd v2 encryption is not implemented. Skipping")
+	if b.encPass == "" {
+		log.Print("No passphrase provided. Skipping etcd v2 backup encryption")
+		return nil
+	}
+
+	// Full path to file.
+	fpath := filepath.Join(tmpDir, b.fname)
+
+	// Encrypt backup.
+	err := encryptFile(fpath, fpath+encExt, b.encPass)
+	if err != nil {
+		return microerror.MaskAny(err)
+	}
+
+	// Update fname in backup object.
+	b.fname = b.fname + encExt
+
+	log.Print("Etcd v2 backup encrypted successfully")
 	return nil
 }
 

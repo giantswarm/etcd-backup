@@ -10,6 +10,7 @@ Create etcd V2 and V3 backup and upload to S3.
 docker run --rm \
     -e ETCDBACKUP_AWS_ACCESS_KEY=XXX \
     -e ETCDBACKUP_AWS_SECRET_KEY=YYY \
+    -e ETCDBACKUP_PASSPHRASE=ZZZ \
     -v /var/lib/etcd:/var/lib/etcd \
     quay.io/giantswarm/etcd-backup \
     -aws-s3-bucket bucket \
@@ -31,6 +32,7 @@ By default tool creates only V3 backup and uploads file to AWS S3.
 ```
 export ETCDBACKUP_AWS_ACCESS_KEY=XXX
 export ETCDBACKUP_AWS_SECRET_KEY=YYY
+export ETCDBACKUP_PASSPHRASE=ZZZ
 
 etcd-backup -aws-s3-bucket bucket -prefix cluster1
 ```

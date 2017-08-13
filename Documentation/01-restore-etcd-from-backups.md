@@ -18,6 +18,14 @@ This guide was written for cluster with following nodes:
 sudo systemctl stop etcd3
 ```
 
+### Decrypt backups
+
+If backups have `.enc` extension, they should be decrypted with `gpg`.
+
+```
+gpg --output backup.db --decrypt backup.db.enc
+```
+
 ### Copy backup files to etcd node 1.
 ```bash
 scp locallab-etcd-backup-v3-2017-07-27T20-50-07.db.tar.gz $ETCD_NODE_1:/tmp
