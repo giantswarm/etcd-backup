@@ -20,7 +20,7 @@ sudo systemctl stop etcd3
 
 ### Copy backup files to etcd node 1.
 ```bash
-scp locallab-etcd-backup-v3-2017-07-27T20-50-07.db $ETCD_NODE_1:/tmp
+scp locallab-etcd-backup-v3-2017-07-27T20-50-07.db.tar.gz $ETCD_NODE_1:/tmp
 scp locallab-etcd-backup-v2-2017-07-31T09-00-30.tar.gz $ETCD_NODE_1:/tmp
 ```
 
@@ -34,8 +34,9 @@ scp locallab-etcd-backup-v2-2017-07-31T09-00-30.tar.gz $ETCD_NODE_1:/tmp
 mkdir /var/lib/etcd3.backup/
 mv /var/lib/etcd3/* /var/lib/etcd3.backup/
 
-tar xf locallab-etcd-backup-v2-2017-07-31T09-00-30.tar.gz -C /tmp
+tar xf /tmp/locallab-etcd-backup-v2-2017-07-31T09-00-30.tar.gz -C /tmp
 cp -r /tmp/locallab-etcd-backup-v2-2017-07-31T09-00-30/* /var/lib/etcd3/
+tar xf /tmp/locallab-etcd-backup-v3-2017-07-27T20-50-07.db.tar.gz -C /tmp
 cp /tmp/locallab-etcd-backup-v3-2017-07-27T20-50-07.db /var/lib/etcd3/member/snap/db
 ```
 
