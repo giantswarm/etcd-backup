@@ -56,7 +56,7 @@ func (b *etcdBackupV3) create() error {
 	// Create tar.gz.
 	err = archiver.TarGz.Make(fpath+tgzExt, []string{fpath})
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	// Update fname in backup object.
