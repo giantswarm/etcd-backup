@@ -44,4 +44,3 @@ etcd-backup -aws-s3-bucket $BUCKET_NAME -prefix $CLUSTER_NAME -etcd-v2-datadir /
 ```
 
 # TODO
-- implement encryption
