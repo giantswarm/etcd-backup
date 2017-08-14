@@ -4,7 +4,7 @@ import (
 	"log"
 	"path/filepath"
 
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 	"github.com/mholt/archiver"
 )
 
@@ -34,13 +34,13 @@ func (b *etcdBackupV2) create() error {
 
 	_, err := execCmd(etcdctlCmd, etcdctlArgs, etcdctlEnvs)
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	// Create tar.gz.
 	err = archiver.TarGz.Make(fpath+tgzExt, []string{fpath})
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	// Update fname in backup object.
@@ -62,7 +62,7 @@ func (b *etcdBackupV2) encrypt() error {
 	// Encrypt backup.
 	err := encryptFile(fpath, fpath+encExt, b.encPass)
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	// Update fname in backup object.
@@ -79,7 +79,7 @@ func (b *etcdBackupV2) upload() error {
 	// Upload
 	err := uploadToS3(fpath, b.aws)
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	log.Print("Etcd v2 backup uploaded successfully")

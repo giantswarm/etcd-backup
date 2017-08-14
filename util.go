@@ -13,7 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 	"golang.org/x/crypto/openpgp"
 )
 
@@ -39,7 +39,7 @@ func execCmd(cmd string, args []string, envs []string) ([]byte, error) {
 	if err != nil {
 		log.Printf("%s", stdOutErr)
 		log.Print(err)
-		return stdOutErr, microerror.MaskAny(err)
+		return stdOutErr, microerror.Mask(err)
 	}
 	return stdOutErr, nil
 }
@@ -53,7 +53,7 @@ func uploadToS3(fpath string, p paramsAWS) error {
 	creds := credentials.NewStaticCredentials(p.accessKey, p.secretKey, "")
 	_, err := creds.Get()
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 	cfg := aws.NewConfig().WithRegion(p.region).WithCredentials(creds)
 	svc := s3.New(session.New(), cfg)
@@ -61,14 +61,14 @@ func uploadToS3(fpath string, p paramsAWS) error {
 	// Upload.
 	file, err := os.Open(fpath)
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 	defer file.Close()
 
 	// Get file size.
 	fileInfo, err := file.Stat()
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 	size := fileInfo.Size()
 
@@ -86,7 +86,7 @@ func uploadToS3(fpath string, p paramsAWS) error {
 	// Put object to S3.
 	_, err = svc.PutObject(params)
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	log.Printf("AWS S3: object %s successfully uploaded to bucket %s", path, p.bucket)
@@ -99,12 +99,12 @@ func encryptData(value []byte, pass string) (ciphertext []byte, err error) {
 
 	encrypter, err := openpgp.SymmetricallyEncrypt(buf, []byte(pass), nil, nil)
 	if err != nil {
-		return nil, microerror.MaskAny(err)
+		return nil, microerror.Mask(err)
 	}
 
 	_, err = encrypter.Write(value)
 	if err != nil {
-		return nil, microerror.MaskAny(err)
+		return nil, microerror.Mask(err)
 	}
 
 	encrypter.Close()
@@ -116,17 +116,17 @@ func encryptData(value []byte, pass string) (ciphertext []byte, err error) {
 func encryptFile(srcPath string, dstPart string, passphrase string) error {
 	data, err := ioutil.ReadFile(srcPath)
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	encData, err := encryptData(data, passphrase)
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	err = ioutil.WriteFile(dstPart, encData, os.FileMode(0600))
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil
