@@ -7,8 +7,6 @@ import:
   - aws/credentials
   - aws/session
   - service/s3
-- package: github.com/giantswarm/microkit
-  subpackages:
-  - error
+- package: github.com/giantswarm/microerror
 - package: github.com/mholt/archiver
   version: ^2.0.0

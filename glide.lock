@@ -1,8 +1,8 @@
-hash: bfaed1b7b0cebeb50447255f88ead4aa99126de28aaa1c1ac3d972e71c9bee85
-updated: 2017-07-24T22:02:23.833706538+02:00
+hash: e9b5eed4bdb9b1cabbe70cb70911e74bfa87c4c6c3e24ca4d881502ae2b4e975
+updated: 2017-08-14T17:04:53.50893634+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: afd601335e2a72d43caa3af6bd2abe512fcc3bfd
+  version: 19490d4d23f5f6dd8061abf91542af8433d28d63
   subpackages:
   - aws
   - aws/awserr
@@ -37,12 +37,10 @@ imports:
   - internal
   - internal/errors
   - internal/prefix
-- name: github.com/giantswarm/microkit
-  version: c2f273484a749a94402dc3cfbd02913f57995484
-  subpackages:
-  - error
+- name: github.com/giantswarm/microerror
+  version: 5ade94eb4ee35ef72eb9382228470caeddb29989
 - name: github.com/go-ini/ini
-  version: 3d73f4b845efdf9989fffd4b4e562727744a34ba
+  version: c787282c39ac1fc618827141a1f762240def08a3
 - name: github.com/jmespath/go-jmespath
   version: bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d
 - name: github.com/juju/errgo
@@ -57,4 +55,14 @@ imports:
   - internal/hash
   - internal/xlog
   - lzma
+- name: golang.org/x/crypto
+  version: 1351f936d976c60a0a48d728281922cf63eafb8d
+  subpackages:
+  - cast5
+  - openpgp
+  - openpgp/armor
+  - openpgp/elgamal
+  - openpgp/errors
+  - openpgp/packet
+  - openpgp/s2k
 testImports: []
