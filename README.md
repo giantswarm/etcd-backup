@@ -1,3 +1,5 @@
+[![Docker Repository on Quay](https://quay.io/repository/giantswarm/etcd-backup/status?token=0728b9a8-10a6-47ac-a1e8-e6e07d2a8747 "Docker Repository on Quay")](https://quay.io/repository/giantswarm/etcd-backup)
+
 # etcd-backup - tool for creating etcd backups and uploading them to AWS S3
 
 ## Quickstart with docker
