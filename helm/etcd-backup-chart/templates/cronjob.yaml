@@ -11,7 +11,7 @@ spec:
   jobTemplate:
     spec:
       # Job timeout
-      activeDeadlineSeconds: 600
+      activeDeadlineSeconds: 120
       template:
         spec:
           # Container creates etcd backups.
