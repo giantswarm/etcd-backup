@@ -14,6 +14,11 @@ spec:
       activeDeadlineSeconds: 120
       template:
         spec:
+          tolerations:
+          # Tolerate master taint
+          - key: node-role.kubernetes.io/master
+            operator: Exists
+            effect: NoSchedule
           # Container creates etcd backups.
           # Run container in host network mode on G8s masters
           # to be able to use 127.0.0.1 as etcd address.
@@ -21,6 +26,10 @@ spec:
           # to etcd data directory. To achive that,
           # mount /var/lib/etcd3 as a volume.
           nodeSelector:
+            # We need to switch to proper label below
+            # when all clusters will have one.
+            #
+            # node-role.kubernetes.io/master: ""
             role: master
           containers:
           - name: etcd-backup
