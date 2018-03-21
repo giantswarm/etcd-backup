@@ -1,0 +1,12 @@
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: etcd-backup-psp
+subjects:
+  - kind: ServiceAccount
+    name: etcd-backup
+    namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: privileged-psp-user
+  apiGroup: rbac.authorization.k8s.io

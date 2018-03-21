@@ -31,6 +31,7 @@ spec:
             #
             # node-role.kubernetes.io/master: ""
             role: master
+          serviceAccountName: etcd-backup
           containers:
           - name: etcd-backup
             # Use latest tag as w/a for https://github.com/giantswarm/architect/issues/135
