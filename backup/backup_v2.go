@@ -87,3 +87,7 @@ func (b *EtcdBackupV2) Upload() error {
 	log.Print("Etcd v2 backup uploaded successfully")
 	return nil
 }
+
+func (b *EtcdBackupV2) Version() string {
+	return "v2"
+}

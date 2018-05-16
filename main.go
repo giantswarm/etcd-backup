@@ -68,14 +68,14 @@ func main() {
 	flag.Parse()
 	config.ParseEnvs(f)
 
-	// check flags
-	config.CheckConfig(f)
-
 	// Print usage.
 	if f.Help {
 		flag.Usage()
 		return
 	}
+
+	// check flags
+	config.CheckConfig(f)
 
 	// Create tempDir where all file related magic happens.
 	var err error
@@ -102,19 +102,9 @@ func main() {
 			TmpDir:  tmpDir,
 		}
 
-		err = v2.Create()
+		err = backup.FullBackup(&v2)
 		if err != nil {
-			log.Fatal("Etcd v2 backup creation failed: ", err)
-		}
-
-		err = v2.Encrypt()
-		if err != nil {
-			log.Fatal("Etcd v2 backup encryption failed: ", err)
-		}
-
-		err = v2.Upload()
-		if err != nil {
-			log.Fatal("Etcd v2 backup upload failed: ", err)
+			log.Fatal("failed")
 		}
 	}
 
@@ -134,19 +124,9 @@ func main() {
 		Key:       f.EtcdV3Key,
 	}
 
-	err = v3.Create()
+	err = backup.FullBackup(&v3)
 	if err != nil {
-		log.Fatal("Etcd v3 backup creation failed: ", err)
-	}
-
-	err = v3.Encrypt()
-	if err != nil {
-		log.Fatal("Etcd v3 backup encryption failed: ", err)
-	}
-
-	err = v3.Upload()
-	if err != nil {
-		log.Fatal("Etcd v3 backup upload failed: ", err)
+		log.Fatal("failed")
 	}
 
 	log.Print("Success")

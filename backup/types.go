@@ -1,7 +1,8 @@
 package backup
 
-type Backup interface {
+type BackupConfig interface {
 	Create() error
 	Encrypt() error
 	Upload() error
+	Version() string
 }
