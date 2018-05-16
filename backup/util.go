@@ -1,4 +1,4 @@
-package main
+package backup
 
 import (
 	"bytes"
@@ -13,8 +13,17 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/giantswarm/etcd-backup/config"
 	"github.com/giantswarm/microerror"
 	"golang.org/x/crypto/openpgp"
+)
+
+const (
+	etcdctlCmd = "etcdctl"
+	awsCmd     = "Aws"
+	tgzExt     = ".tar.gz"
+	encExt     = ".enc"
+	dbExt      = ".db"
 )
 
 // Outputs timestamp.
@@ -48,14 +57,14 @@ func execCmd(cmd string, args []string, envs []string) ([]byte, error) {
 // Arguments:
 // - fpath - full path to target file
 // - p     - paramsAWS struct with AWS keys and bucket name
-func uploadToS3(fpath string, p paramsAWS) error {
+func uploadToS3(fpath string, p config.AWSConfig) error {
 	// Login to AWS S3
-	creds := credentials.NewStaticCredentials(p.accessKey, p.secretKey, "")
+	creds := credentials.NewStaticCredentials(p.AccessKey, p.SecretKey, "")
 	_, err := creds.Get()
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	cfg := aws.NewConfig().WithRegion(p.region).WithCredentials(creds)
+	cfg := aws.NewConfig().WithRegion(p.Region).WithCredentials(creds)
 	svc := s3.New(session.New(), cfg)
 
 	// Upload.
@@ -76,7 +85,7 @@ func uploadToS3(fpath string, p paramsAWS) error {
 	path := filepath.Base(fileInfo.Name())
 
 	params := &s3.PutObjectInput{
-		Bucket:        aws.String(p.bucket),
+		Bucket:        aws.String(p.Bucket),
 		Key:           aws.String(path),
 		Body:          file,
 		ContentLength: aws.Int64(size),
@@ -89,7 +98,7 @@ func uploadToS3(fpath string, p paramsAWS) error {
 		return microerror.Mask(err)
 	}
 
-	log.Printf("AWS S3: object %s successfully uploaded to bucket %s", path, p.bucket)
+	log.Printf("AWS S3: object %s successfully uploaded to bucket %s", path, p.Bucket)
 	return nil
 }
 

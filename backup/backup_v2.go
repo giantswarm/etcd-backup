@@ -1,35 +1,37 @@
-package main
+package backup
 
 import (
 	"log"
 	"path/filepath"
 
+	"github.com/giantswarm/etcd-backup/config"
 	"github.com/giantswarm/microerror"
 	"github.com/mholt/archiver"
 )
 
-type etcdBackupV2 struct {
-	aws     paramsAWS
-	prefix  string
-	fname   string
-	datadir string
-	encPass string
+type EtcdBackupV2 struct {
+	Aws      config.AWSConfig
+	Prefix   string
+	Filename string
+	Datadir  string
+	EncPass  string
+	TmpDir   string
 }
 
 // Create backup in temporary directory, tar and compress.
-func (b *etcdBackupV2) create() error {
+func (b *EtcdBackupV2) Create() error {
 	// Filename
-	b.fname = b.prefix + "-etcd-backup-v2-" + getTimeStamp()
+	b.Filename = b.Prefix + "-etcd-backup-v2-" + getTimeStamp()
 
 	// Full path to file.
-	fpath := filepath.Join(tmpDir, b.fname)
+	fpath := filepath.Join(b.TmpDir, b.Filename)
 
 	// Create a backup.
 	etcdctlEnvs := []string{}
 	etcdctlArgs := []string{
 		"backup",
-		"--data-dir", b.datadir,
-		"--backup-dir", filepath.Join(tmpDir, b.fname),
+		"--data-dir", b.Datadir,
+		"--backup-dir", filepath.Join(b.TmpDir, b.Filename),
 	}
 
 	_, err := execCmd(etcdctlCmd, etcdctlArgs, etcdctlEnvs)
@@ -43,41 +45,41 @@ func (b *etcdBackupV2) create() error {
 		return microerror.Mask(err)
 	}
 
-	// Update fname in backup object.
-	b.fname = b.fname + tgzExt
+	// Update Filename in backup object.
+	b.Filename = b.Filename + tgzExt
 
 	log.Print("Etcd v2 backup created successfully")
 	return nil
 }
 
-func (b *etcdBackupV2) encrypt() error {
-	if b.encPass == "" {
+func (b *EtcdBackupV2) Encrypt() error {
+	if b.EncPass == "" {
 		log.Print("No passphrase provided. Skipping etcd v2 backup encryption")
 		return nil
 	}
 
 	// Full path to file.
-	fpath := filepath.Join(tmpDir, b.fname)
+	fpath := filepath.Join(b.TmpDir, b.Filename)
 
 	// Encrypt backup.
-	err := encryptFile(fpath, fpath+encExt, b.encPass)
+	err := encryptFile(fpath, fpath+encExt, b.EncPass)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	// Update fname in backup object.
-	b.fname = b.fname + encExt
+	// Update Filename in backup object.
+	b.Filename = b.Filename + encExt
 
 	log.Print("Etcd v2 backup encrypted successfully")
 	return nil
 }
 
 // Upload resulted backup to S3.
-func (b *etcdBackupV2) upload() error {
-	fpath := filepath.Join(tmpDir, b.fname)
+func (b *EtcdBackupV2) Upload() error {
+	fpath := filepath.Join(b.TmpDir, b.Filename)
 
 	// Upload
-	err := uploadToS3(fpath, b.aws)
+	err := uploadToS3(fpath, b.Aws)
 	if err != nil {
 		return microerror.Mask(err)
 	}
