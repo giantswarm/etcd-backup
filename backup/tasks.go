@@ -9,17 +9,19 @@ func FullBackup(b BackupConfig) error {
 
 	err = b.Create()
 	if err != nil {
-		log.Fatal("Etcd "+version+" backup creation failed: ", err)
+		log.Printf("Etcd "+version+" backup creation failed: ", err)
 	}
 
 	err = b.Encrypt()
 	if err != nil {
-		log.Fatal("Etcd "+version+" backup encryption failed: ", err)
+		log.Printf("Etcd "+version+" backup encryption failed: ", err)
 	}
 
 	err = b.Upload()
 	if err != nil {
-		log.Fatal("Etcd "+version+" backup upload failed: ", err)
+		log.Printf("Etcd "+version+" backup upload failed: ", err)
 	}
+
+	return err
 
 }
