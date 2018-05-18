@@ -1,4 +1,4 @@
-package backup
+package etcd
 
 import (
 	"log"
@@ -21,10 +21,10 @@ type EtcdBackupV3 struct {
 	TmpDir    string
 }
 
-// Create backup in temporary directory.
+// Create etcd in temporary directory.
 func (b *EtcdBackupV3) Create() error {
 	// Filename
-	b.Filename = b.Prefix + "-etcd-backup-v3-" + getTimeStamp() + dbExt
+	b.Filename = b.Prefix + "-etcd-etcd-v3-" + getTimeStamp() + dbExt
 
 	// Full path to file.
 	fpath := filepath.Join(b.TmpDir, b.Filename)
@@ -49,7 +49,7 @@ func (b *EtcdBackupV3) Create() error {
 		etcdctlArgs = append(etcdctlArgs, "--Key", b.Key)
 	}
 
-	// Create a backup.
+	// Create a etcd.
 	_, err := execCmd(etcdctlCmd, etcdctlArgs, etcdctlEnvs)
 	if err != nil {
 		return microerror.Mask(err)
@@ -61,36 +61,36 @@ func (b *EtcdBackupV3) Create() error {
 		return microerror.Mask(err)
 	}
 
-	// Update Filename in backup object.
+	// Update Filename in etcd object.
 	b.Filename = b.Filename + tgzExt
 
-	log.Print("Etcd v3 backup created successfully")
+	log.Print("Etcd v3 etcd created successfully")
 	return nil
 }
 
 func (b *EtcdBackupV3) Encrypt() error {
 	if b.EncPass == "" {
-		log.Print("No passphrase provided. Skipping etcd v3 backup encryption")
+		log.Print("No passphrase provided. Skipping etcd v3 etcd encryption")
 		return nil
 	}
 
 	// Full path to file.
 	fpath := filepath.Join(b.TmpDir, b.Filename)
 
-	// Encrypt backup.
+	// Encrypt etcd.
 	err := encryptFile(fpath, fpath+encExt, b.EncPass)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	// Update Filename in backup object.
+	// Update Filename in etcd object.
 	b.Filename = b.Filename + encExt
 
-	log.Print("Etcd v3 backup encrypted successfully")
+	log.Print("Etcd v3 etcd encrypted successfully")
 	return nil
 }
 
-// Upload resulted backup to S3.
+// Upload resulted etcd to S3.
 func (b *EtcdBackupV3) Upload() error {
 	fpath := filepath.Join(b.TmpDir, b.Filename)
 
@@ -100,7 +100,7 @@ func (b *EtcdBackupV3) Upload() error {
 		return microerror.Mask(err)
 	}
 
-	log.Print("Etcd v3 backup uploaded successfully")
+	log.Print("Etcd v3 etcd uploaded successfully")
 	return nil
 }
 

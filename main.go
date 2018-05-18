@@ -3,10 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
-	"log"
 	"os"
 	"runtime"
+
+	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/etcd-backup/backup"
 	"github.com/giantswarm/etcd-backup/config"
@@ -14,18 +14,18 @@ import (
 
 // TODO:
 // - check etcdctl exists and right version
+const backupFailedCode = 1
 
 // Common variables.
 var (
-	description string = "Application to backup etcd."
+	description string = "Application to etcd etcd."
 	gitCommit   string = "n/a"
-	name        string = "etcd-backup"
-	source      string = "https://github.com/giantswarm/etcd-backup"
+	name        string = "etcd-etcd"
+	source      string = "https://github.com/giantswarm/etcd-etcd"
 )
 
 var (
-	tmpDir string
-	f      config.Flags
+	f config.Flags
 )
 
 func main() {
@@ -46,12 +46,12 @@ func main() {
 
 	flag.StringVar(&f.AwsS3Bucket, "aws-s3-bucket", "etcdbackups", "AWS S3 bucket for backups")
 	flag.StringVar(&f.AwsS3Region, "aws-s3-region", "us-east-1", "AWS S3 region for backups")
-	flag.StringVar(&f.EtcdV2DataDir, "etcd-v2-datadir", "", "Etcd datadir. If not set V2 backup will be skipped")
+	flag.StringVar(&f.EtcdV2DataDir, "etcd-v2-datadir", "", "Etcd datadir. If not set V2 etcd will be skipped")
 	flag.StringVar(&f.EtcdV3Cert, "etcd-v3-cert", "", "Client certificate for etcd connection")
 	flag.StringVar(&f.EtcdV3CACert, "etcd-v3-cacert", "", "Client CA certificate for etcd connection")
 	flag.StringVar(&f.EtcdV3Key, "etcd-v3-key", "", "Client private key for etcd connection")
 	flag.StringVar(&f.EtcdV3Endpoints, "etcd-v3-endpoints", "http://127.0.0.1:2379", "Endpoints for etcd connection")
-	flag.StringVar(&f.Prefix, "prefix", "", "[mandatory] Prefix to use in backup filenames")
+	flag.StringVar(&f.Prefix, "prefix", "", "[mandatory] Prefix to use in etcd filenames")
 
 	flag.BoolVar(&f.Help, "help", false, "Print usage and exit")
 
@@ -76,58 +76,24 @@ func main() {
 
 	// check flags
 	config.CheckConfig(f)
+	// create micrologger
+	loggerConfig := micrologger.Config{}
+	logger, err := micrologger.New(loggerConfig)
 
-	// Create tempDir where all file related magic happens.
-	var err error
-	tmpDir, err = ioutil.TempDir("", "")
+	// create backup service
+	backupService := backup.CreateService(f, logger)
+
+	// backup host cluster
+	err = backupService.BackupHostCluster()
 	if err != nil {
-		log.Fatal(err)
+		logger.Log("level", "error", "msg", "failed to backup host cluster etcd", "reason", err)
+		os.Exit(backupFailedCode)
 	}
-	log.Print("Created temporary directory: ", tmpDir)
-
-	defer os.RemoveAll(tmpDir) // clean up after finished.
-
-	// V2 backup.
-	if !f.SkipV2 {
-		v2 := backup.EtcdBackupV2{
-			Aws: config.AWSConfig{
-				AccessKey: f.AwsAccessKey,
-				SecretKey: f.AwsSecretKey,
-				Bucket:    f.AwsS3Bucket,
-				Region:    f.AwsS3Region,
-			},
-			Datadir: f.EtcdV2DataDir,
-			EncPass: f.EncryptPass,
-			Prefix:  f.Prefix,
-			TmpDir:  tmpDir,
-		}
-
-		err = backup.FullBackup(&v2)
-		if err != nil {
-			log.Fatal("failed")
-		}
-	}
-
-	// V3 backup.
-	v3 := backup.EtcdBackupV3{
-		Aws: config.AWSConfig{
-			AccessKey: f.AwsAccessKey,
-			SecretKey: f.AwsSecretKey,
-			Bucket:    f.AwsS3Bucket,
-			Region:    f.AwsS3Region,
-		},
-		CACert:    f.EtcdV3CACert,
-		Cert:      f.EtcdV3Cert,
-		Prefix:    f.Prefix,
-		EncPass:   f.EncryptPass,
-		Endpoints: f.EtcdV3Endpoints,
-		Key:       f.EtcdV3Key,
-	}
-
-	err = backup.FullBackup(&v3)
+	// backup guest cluster
+	err = backupService.BackupGuestClusters()
 	if err != nil {
-		log.Fatal("failed")
+		logger.Log("level", "error", "msg", "failed to backup guest cluster etcd", "reason", err)
+		os.Exit(backupFailedCode)
 	}
-
-	log.Print("Success")
+	logger.Log("level", "info", "msg", "Success")
 }

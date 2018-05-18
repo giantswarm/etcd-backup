@@ -21,6 +21,7 @@ type AWSConfig struct {
 }
 
 // Initialize parameters.
+
 type Flags struct {
 	Prefix          string
 	EtcdV2DataDir   string
@@ -34,6 +35,7 @@ type Flags struct {
 	AwsS3Region     string
 	EncryptPass     string
 	Help            bool
+	Provider        string
 	SkipV2          bool
 }
 
@@ -58,10 +60,10 @@ func CheckConfig(f Flags) error {
 		return microerror.Mask(invalidConfigError)
 	}
 
-	// Skip V2 backup if not datadir provided.
+	// Skip V2 etcd if not datadir provided.
 	if f.EtcdV2DataDir == "" {
 		f.SkipV2 = true
-		log.Print("Skipping etcd V2 backup as -etcd-v2-datadir is not set")
+		log.Print("Skipping etcd V2 etcd as -etcd-v2-datadir is not set")
 		return microerror.Mask(invalidConfigError)
 	}
 

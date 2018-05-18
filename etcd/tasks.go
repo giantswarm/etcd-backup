@@ -1,28 +1,27 @@
-package backup
+package etcd
 
-import "log"
+import (
+	"github.com/giantswarm/microerror"
+)
 
-func FullBackup(b BackupConfig) error {
+func FullBackup(b BackupInterface) error {
 	var err error
 
 	version := b.Version()
 
 	err = b.Create()
 	if err != nil {
-		log.Printf("Etcd "+version+" backup creation failed: ", err)
-		return  err
+		return microerror.Maskf(err, "Etcd %s creation failed: %s", version, err)
 	}
 
 	err = b.Encrypt()
 	if err != nil {
-		log.Printf("Etcd "+version+" backup encryption failed: ", err)
-		return  err
+		microerror.Maskf(err, "Etcd %s encryption failed: %s", version, err)
 	}
 
 	err = b.Upload()
 	if err != nil {
-		log.Printf("Etcd "+version+" backup upload failed: ", err)
-		return  err
+		microerror.Maskf(err, "Etcd %s upload failed: %s", version, err)
 	}
 	return nil
 }
