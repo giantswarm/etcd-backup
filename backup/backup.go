@@ -5,6 +5,7 @@ import (
 	"github.com/giantswarm/etcd-backup/etcd"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"log"
 )
 
 type Service struct {
@@ -182,6 +183,8 @@ func (s *Service) BackupGuestClusters() error {
 	// check if any backup failed
 	if failed {
 		return failedBackupError
+	} else {
+		log.Printf("Finished guest cluster backup. Total guest clusters: %d", len(clusterList))
 	}
 
 	return nil
