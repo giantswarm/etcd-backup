@@ -130,13 +130,22 @@ func (s *Service) BackupGuestClusters() error {
 
 	// iterate over all clusters
 	for _, clusterID := range clusterList {
+		// fetch etcd certs
 		certs, err := FetchCerts(clusterID, k8sClient)
 		if err != nil {
 			failed = true
 			s.Logger.Log("level", "error", "msg", "Failed to fetch etcd certs for cluster "+clusterID, "reason", err)
 			continue
 		}
-		//
+		// write etcd certs to tmpdir
+		err = CreateCertFiles(clusterID, certs, tmpDir)
+		if err != nil {
+			failed = true
+			s.Logger.Log("level", "error", "msg", "Failed to write etcd certs to tmpdir for cluster "+clusterID, "reason", err)
+			continue
+		}
+
+		// fetch etcd endpoint
 		etcdEndpoint, err := GetEtcdEndpoint(clusterID, k8sClient)
 		if err != nil {
 			failed = true
@@ -151,9 +160,9 @@ func (s *Service) BackupGuestClusters() error {
 				Bucket:    s.AwsS3Bucket,
 				Region:    s.AwsS3Region,
 			},
-			CACert: string(certs.CAData),
-			Cert:   string(certs.CrtData),
-			Key:    string(certs.KeyData),
+			CACert: certs.CAFile,
+			Cert:   certs.CrtFile,
+			Key:    certs.KeyFile,
 
 			Prefix:    BackupPrefix(clusterID),
 			EncPass:   s.EncryptPass,

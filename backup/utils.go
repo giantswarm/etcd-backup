@@ -141,3 +141,44 @@ func GetEtcdEndpoint(clusterID string, k8sClient kubernetes.Interface) (string, 
 	}
 	return ingress.Spec.Rules[0].Host, nil
 }
+
+// create cert files in tmp dir from certConfig and saves filenames back
+func CreateCertFiles(clusterID string, certConfig *k8sclient.TLSClientConfig, tmpDir string) error {
+	// cert
+	crtFile, err := os.Open(CertFile(clusterID, tmpDir))
+	if err != nil {
+		return microerror.Maskf(err, "Failed to open crt file for writing "+CertFile(clusterID, tmpDir))
+	}
+	defer crtFile.Close()
+	_, err = crtFile.Write(certConfig.CrtData)
+	if err != nil {
+		return microerror.Maskf(err, "Failed to write crt file  "+CertFile(clusterID, tmpDir))
+	}
+	certConfig.CrtFile = CertFile(clusterID, tmpDir)
+
+	// key
+	keyFile, err := os.Open(KeyFile(clusterID, tmpDir))
+	if err != nil {
+		return microerror.Maskf(err, "Failed to open key file for writing "+KeyFile(clusterID, tmpDir))
+	}
+	defer keyFile.Close()
+	_, err = keyFile.Write(certConfig.KeyData)
+	if err != nil {
+		return microerror.Maskf(err, "Failed to write key file  "+KeyFile(clusterID, tmpDir))
+	}
+	certConfig.KeyFile = KeyFile(clusterID, tmpDir)
+
+	// ca
+	caFile, err := os.Open(CAFile(clusterID, tmpDir))
+	if err != nil {
+		return microerror.Maskf(err, "Failed to open ca file for writing "+CAFile(clusterID, tmpDir))
+	}
+	defer caFile.Close()
+	_, err = caFile.Write(certConfig.CAData)
+	if err != nil {
+		return microerror.Maskf(err, "Failed to write ca file  "+CAFile(clusterID, tmpDir))
+	}
+	certConfig.CAFile = CAFile(clusterID, tmpDir)
+
+	return nil
+}
