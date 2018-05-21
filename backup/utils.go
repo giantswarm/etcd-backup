@@ -158,7 +158,7 @@ func GetEtcdEndpoint(clusterID string, provider string, crdCLient *versioned.Cli
 		}
 		etcdDomain = crd.Spec.Cluster.Etcd.Domain
 	}
-	etcdEndpoint := fmt.Sprintf("https://%s:443", etcdDomain)
+	etcdEndpoint := fmt.Sprintf("https://%s:2379", etcdDomain)
 	// we already check for unknown provider at the start
 
 	return etcdEndpoint, nil

@@ -35,9 +35,10 @@ spec:
           containers:
           - name: etcd-backup
             # Use latest tag as w/a for https://github.com/giantswarm/architect/issues/135
-            image: quay.io/giantswarm/etcd-backup:latest
+            image: quay.io/giantswarm/etcd-backup:[[ .SHA ]]
             args:
             - -prefix={{ .Values.Installation.V1.Infra.EtcdBackup.ClusterPrefix }}
+            - -provider={{ .Values.Installation.V1.Provider.Kind }}
             - -etcd-v2-datadir=/var/lib/etcd
             - -etcd-v3-endpoints={{ .Values.Installation.V1.Infra.EtcdBackup.EtcdEndpoints }}
             - -etcd-v3-cacert=/certs/{{ .Values.Installation.V1.Infra.EtcdBackup.ClientCaCertFileName }}
