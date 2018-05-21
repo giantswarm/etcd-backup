@@ -37,16 +37,16 @@ func (b *EtcdBackupV3) Create() error {
 	}
 
 	if b.Endpoints != "" {
-		etcdctlArgs = append(etcdctlArgs, "--Endpoints", b.Endpoints)
+		etcdctlArgs = append(etcdctlArgs, "--endpoints", b.Endpoints)
 	}
 	if b.CACert != "" {
-		etcdctlArgs = append(etcdctlArgs, "--CACert", b.CACert)
+		etcdctlArgs = append(etcdctlArgs, "--cacert", b.CACert)
 	}
 	if b.Cert != "" {
-		etcdctlArgs = append(etcdctlArgs, "--Cert", b.Cert)
+		etcdctlArgs = append(etcdctlArgs, "--cert", b.Cert)
 	}
 	if b.Key != "" {
-		etcdctlArgs = append(etcdctlArgs, "--Key", b.Key)
+		etcdctlArgs = append(etcdctlArgs, "--key", b.Key)
 	}
 
 	// Create a etcd.
