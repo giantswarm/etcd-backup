@@ -81,7 +81,7 @@ func GetAllGuestClusters(provider string, crdCLient *versioned.Clientset) ([]str
 	listOpt := metav1.ListOptions{}
 
 	if provider == aws {
-		crdList, err := crdCLient.CoreV1alpha1().AWSClusterConfigs(crdNamespace).List(listOpt)
+		crdList, err := crdCLient.ProviderV1alpha1().AWSConfigs(crdNamespace).List(listOpt)
 		if err != nil {
 			return []string{}, microerror.Maskf(err, "failed to list aws crd")
 		}
@@ -90,7 +90,7 @@ func GetAllGuestClusters(provider string, crdCLient *versioned.Clientset) ([]str
 		}
 
 	} else if provider == azure {
-		crdList, err := crdCLient.CoreV1alpha1().AzureClusterConfigs(crdNamespace).List(listOpt)
+		crdList, err := crdCLient.ProviderV1alpha1().AzureConfigs(crdNamespace).List(listOpt)
 		if err != nil {
 			return []string{}, microerror.Maskf(err, "failed to list azure crd")
 		}
@@ -99,7 +99,7 @@ func GetAllGuestClusters(provider string, crdCLient *versioned.Clientset) ([]str
 		}
 
 	} else if provider == kvm {
-		crdList, err := crdCLient.CoreV1alpha1().KVMClusterConfigs(crdNamespace).List(listOpt)
+		crdList, err := crdCLient.ProviderV1alpha1().KVMConfigs(crdNamespace).List(listOpt)
 		if err != nil {
 			return []string{}, microerror.Maskf(err, "failed to list azure crd")
 		}
