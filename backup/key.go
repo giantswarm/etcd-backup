@@ -16,6 +16,8 @@ const (
 
 	// namespace where crds are located
 	crdNamespace = "default"
+
+	fileMode = 0600
 )
 
 func BackupPrefix(clusterID string) string {
