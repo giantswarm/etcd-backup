@@ -31,7 +31,7 @@ func (b *EtcdBackupV2) Create() error {
 	etcdctlArgs := []string{
 		"backup",
 		"--data-dir", b.Datadir,
-		"--etcd-dir", filepath.Join(b.TmpDir, b.Filename),
+		"--backup-dir", filepath.Join(b.TmpDir, b.Filename),
 	}
 
 	_, err := execCmd(etcdctlCmd, etcdctlArgs, etcdctlEnvs)
@@ -54,7 +54,7 @@ func (b *EtcdBackupV2) Create() error {
 
 func (b *EtcdBackupV2) Encrypt() error {
 	if b.EncPass == "" {
-		log.Print("No passphrase provided. Skipping etcd v2 etcd encryption")
+		log.Print("No passphrase provided. Skipping etcd v2 backup encryption")
 		return nil
 	}
 
@@ -70,7 +70,7 @@ func (b *EtcdBackupV2) Encrypt() error {
 	// Update Filename in etcd object.
 	b.Filename = b.Filename + encExt
 
-	log.Print("Etcd v2 etcd encrypted successfully")
+	log.Print("Etcd v2 backup encrypted successfully")
 	return nil
 }
 
@@ -84,7 +84,7 @@ func (b *EtcdBackupV2) Upload() error {
 		return microerror.Mask(err)
 	}
 
-	log.Print("Etcd v2 etcd uploaded successfully")
+	log.Print("Etcd v2 backup uploaded successfully")
 	return nil
 }
 

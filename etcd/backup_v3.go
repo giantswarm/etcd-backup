@@ -24,7 +24,7 @@ type EtcdBackupV3 struct {
 // Create etcd in temporary directory.
 func (b *EtcdBackupV3) Create() error {
 	// Filename
-	b.Filename = b.Prefix + "-etcd-etcd-v3-" + getTimeStamp() + dbExt
+	b.Filename = b.Prefix + "-backup-etcd-v3-" + getTimeStamp() + dbExt
 
 	// Full path to file.
 	fpath := filepath.Join(b.TmpDir, b.Filename)
@@ -64,13 +64,13 @@ func (b *EtcdBackupV3) Create() error {
 	// Update Filename in etcd object.
 	b.Filename = b.Filename + tgzExt
 
-	log.Print("Etcd v3 etcd created successfully")
+	log.Print("Etcd v3 backup created successfully")
 	return nil
 }
 
 func (b *EtcdBackupV3) Encrypt() error {
 	if b.EncPass == "" {
-		log.Print("No passphrase provided. Skipping etcd v3 etcd encryption")
+		log.Print("No passphrase provided. Skipping etcd v3 backup encryption")
 		return nil
 	}
 
@@ -86,7 +86,7 @@ func (b *EtcdBackupV3) Encrypt() error {
 	// Update Filename in etcd object.
 	b.Filename = b.Filename + encExt
 
-	log.Print("Etcd v3 etcd encrypted successfully")
+	log.Print("Etcd v3 backup encrypted successfully")
 	return nil
 }
 
@@ -100,7 +100,7 @@ func (b *EtcdBackupV3) Upload() error {
 		return microerror.Mask(err)
 	}
 
-	log.Print("Etcd v3 etcd uploaded successfully")
+	log.Print("Etcd v3 backup uploaded successfully")
 	return nil
 }
 
