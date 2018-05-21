@@ -40,7 +40,7 @@ type Flags struct {
 }
 
 // parse
-func ParseEnvs(f Flags) {
+func ParseEnvs(f *Flags) {
 	f.AwsAccessKey = os.Getenv(EnvAwsAccessKey)
 	f.AwsSecretKey = os.Getenv(EnvAwsSecretKey)
 	f.EncryptPass = os.Getenv(EnvEncryptPassph)

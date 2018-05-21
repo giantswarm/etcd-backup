@@ -66,7 +66,7 @@ func main() {
 	}
 	// parse flags
 	flag.Parse()
-	config.ParseEnvs(f)
+	config.ParseEnvs(&f)
 
 	// Print usage.
 	if f.Help {
