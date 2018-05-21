@@ -11,38 +11,41 @@ import (
 type Service struct {
 	Logger micrologger.Logger
 
-	Prefix          string
+	AwsAccessKey    string
+	AwsSecretKey    string
+	AwsS3Bucket     string
+	AwsS3Region     string
 	EtcdV2DataDir   string
 	EtcdV3Cert      string
 	EtcdV3CACert    string
 	EtcdV3Key       string
 	EtcdV3Endpoints string
-	AwsAccessKey    string
-	AwsSecretKey    string
-	AwsS3Bucket     string
-	AwsS3Region     string
 	EncryptPass     string
-	Help            bool
+	Prefix          string
 	Provider        string
-	SkipV2          bool
+
+	Help   bool
+	SkipV2 bool
 }
 
 func CreateService(f config.Flags, logger micrologger.Logger) *Service {
 	s := &Service{
 		Logger: logger,
 
-		Prefix:          f.Prefix,
-		EtcdV2DataDir:   f.EtcdV2DataDir,
-		EtcdV3CACert:    f.EtcdV3CACert,
-		EtcdV3Cert:      f.EtcdV3Cert,
-		EtcdV3Key:       f.EtcdV3Key,
-		EtcdV3Endpoints: f.EtcdV3Endpoints,
 		AwsAccessKey:    f.AwsAccessKey,
 		AwsSecretKey:    f.AwsSecretKey,
 		AwsS3Bucket:     f.AwsS3Bucket,
 		AwsS3Region:     f.AwsS3Region,
 		EncryptPass:     f.EncryptPass,
+		EtcdV2DataDir:   f.EtcdV2DataDir,
+		EtcdV3CACert:    f.EtcdV3CACert,
+		EtcdV3Cert:      f.EtcdV3Cert,
+		EtcdV3Key:       f.EtcdV3Key,
+		EtcdV3Endpoints: f.EtcdV3Endpoints,
+		Prefix:          f.Prefix,
 		Provider:        f.Provider,
+
+		SkipV2: f.SkipV2,
 	}
 	return s
 }
