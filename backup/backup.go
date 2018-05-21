@@ -33,6 +33,7 @@ func CreateService(f config.Flags, logger micrologger.Logger) *Service {
 
 		Prefix:          f.Prefix,
 		EtcdV2DataDir:   f.EtcdV2DataDir,
+		EtcdV3CACert:    f.EtcdV3CACert,
 		EtcdV3Cert:      f.EtcdV3Cert,
 		EtcdV3Key:       f.EtcdV3Key,
 		EtcdV3Endpoints: f.EtcdV3Endpoints,
