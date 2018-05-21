@@ -125,7 +125,7 @@ func FetchCerts(clusterID string, k8sClient kubernetes.Interface) (*k8sclient.TL
 		}
 		certs.CAData = secret.Data["ca"]
 		certs.KeyData = secret.Data["key"]
-		certs.KeyData = secret.Data["crt"]
+		certs.CrtData = secret.Data["crt"]
 	}
 
 	return certs, nil
