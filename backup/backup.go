@@ -151,7 +151,7 @@ func (s *Service) BackupGuestClusters() error {
 		}
 
 		// fetch etcd endpoint
-		etcdEndpoint, err := GetEtcdEndpoint(clusterID, k8sClient)
+		etcdEndpoint, err := GetEtcdEndpoint(clusterID, s.Provider, crdClient)
 		if err != nil {
 			failed = true
 			s.Logger.Log("level", "error", "msg", "Failed to fetch etcd endpoint for cluster "+clusterID, "reason", err)
