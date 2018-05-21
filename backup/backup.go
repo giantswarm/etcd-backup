@@ -28,7 +28,7 @@ type Service struct {
 }
 
 func CreateService(f config.Flags, logger micrologger.Logger) *Service {
-	c := &Service{
+	s := &Service{
 		Logger: logger,
 
 		Prefix:          f.Prefix,
@@ -43,11 +43,11 @@ func CreateService(f config.Flags, logger micrologger.Logger) *Service {
 		EncryptPass:     f.EncryptPass,
 		Provider:        f.Provider,
 	}
-	return c
+	return s
 }
 
 // backup host cluster etcd
-func (c *Service) BackupHostCluster() error {
+func (s *Service) BackupHostCluster() error {
 	var err error
 	// temporary directory for files
 	tmpDir, err := CreateTMPDir()
@@ -57,17 +57,17 @@ func (c *Service) BackupHostCluster() error {
 	defer ClearTMPDir(tmpDir)
 
 	// V2 etcd.
-	if !c.SkipV2 {
+	if !s.SkipV2 {
 		v2 := etcd.EtcdBackupV2{
 			Aws: config.AWSConfig{
-				AccessKey: c.AwsAccessKey,
-				SecretKey: c.AwsSecretKey,
-				Bucket:    c.AwsS3Bucket,
-				Region:    c.AwsS3Region,
+				AccessKey: s.AwsAccessKey,
+				SecretKey: s.AwsSecretKey,
+				Bucket:    s.AwsS3Bucket,
+				Region:    s.AwsS3Region,
 			},
-			Datadir: c.EtcdV2DataDir,
-			EncPass: c.EncryptPass,
-			Prefix:  c.Prefix,
+			Datadir: s.EtcdV2DataDir,
+			EncPass: s.EncryptPass,
+			Prefix:  s.Prefix,
 			TmpDir:  tmpDir,
 		}
 		// run backup task
@@ -80,17 +80,17 @@ func (c *Service) BackupHostCluster() error {
 	// V3 etcd.
 	v3 := etcd.EtcdBackupV3{
 		Aws: config.AWSConfig{
-			AccessKey: c.AwsAccessKey,
-			SecretKey: c.AwsSecretKey,
-			Bucket:    c.AwsS3Bucket,
-			Region:    c.AwsS3Region,
+			AccessKey: s.AwsAccessKey,
+			SecretKey: s.AwsSecretKey,
+			Bucket:    s.AwsS3Bucket,
+			Region:    s.AwsS3Region,
 		},
-		CACert:    c.EtcdV3CACert,
-		Cert:      c.EtcdV3Cert,
-		Prefix:    c.Prefix,
-		EncPass:   c.EncryptPass,
-		Endpoints: c.EtcdV3Endpoints,
-		Key:       c.EtcdV3Key,
+		CACert:    s.EtcdV3CACert,
+		Cert:      s.EtcdV3Cert,
+		Prefix:    s.Prefix,
+		EncPass:   s.EncryptPass,
+		Endpoints: s.EtcdV3Endpoints,
+		Key:       s.EtcdV3Key,
 		TmpDir:    tmpDir,
 	}
 	// run backup task

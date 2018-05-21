@@ -18,10 +18,10 @@ const backupFailedCode = 1
 
 // Common variables.
 var (
-	description string = "Application to etcd etcd."
+	description string = "Application to backup etcd."
 	gitCommit   string = "n/a"
 	name        string = "etcd-etcd"
-	source      string = "https://github.com/giantswarm/etcd-etcd"
+	source      string = "https://github.com/giantswarm/backup-etcd"
 )
 
 var (

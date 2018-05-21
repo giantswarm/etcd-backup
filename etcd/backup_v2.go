@@ -29,7 +29,7 @@ func (b *EtcdBackupV2) Create() error {
 	// Create a etcd.
 	etcdctlEnvs := []string{}
 	etcdctlArgs := []string{
-		"etcd",
+		"backup",
 		"--data-dir", b.Datadir,
 		"--etcd-dir", filepath.Join(b.TmpDir, b.Filename),
 	}
