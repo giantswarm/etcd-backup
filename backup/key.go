@@ -21,7 +21,7 @@ const (
 )
 
 func BackupPrefix(clusterID string) string {
-	return "k8s-" + clusterID
+	return "-" + clusterID
 }
 
 func CertFile(clusterID string, tmpDir string) string {

@@ -6,6 +6,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"log"
+	"time"
 )
 
 type Service struct {
@@ -169,7 +170,7 @@ func (s *Service) BackupGuestClusters() error {
 			Cert:   certs.CrtFile,
 			Key:    certs.KeyFile,
 
-			Prefix:    BackupPrefix(clusterID),
+			Prefix:    s.Prefix + BackupPrefix(clusterID),
 			EncPass:   s.EncryptPass,
 			Endpoints: etcdEndpoint,
 
@@ -186,6 +187,7 @@ func (s *Service) BackupGuestClusters() error {
 	}
 	// check if any backup failed
 	if failed {
+		time.Sleep(time.Minute * 5)
 		return failedBackupError
 	} else {
 		log.Printf("Finished guest cluster backup. Total guest clusters: %d", len(clusterList))
