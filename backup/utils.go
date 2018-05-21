@@ -132,14 +132,35 @@ func FetchCerts(clusterID string, k8sClient kubernetes.Interface) (*k8sclient.TL
 }
 
 // fetch guest cluster etcd endpoint
-func GetEtcdEndpoint(clusterID string, k8sClient kubernetes.Interface) (string, error) {
+func GetEtcdEndpoint(clusterID string, provider string, crdCLient *versioned.Clientset) (string, error) {
 	getOpts := metav1.GetOptions{}
-	ingress, err := k8sClient.ExtensionsV1beta1().Ingresses(clusterID).Get("etcd", getOpts)
-	if err != nil {
-		fmt.Println()
-		return "", microerror.Maskf(err, "error getting etcd endpoint for guest cluster %s", clusterID)
+	var etcdEndpoint string
+
+	if provider == aws {
+		crd, err := crdCLient.ProviderV1alpha1().AWSConfigs(crdNamespace).Get(clusterID, getOpts)
+		if err != nil {
+			fmt.Println()
+			return "", microerror.Maskf(err, "error getting aws crd for guest cluster %s", clusterID)
+		}
+		etcdEndpoint = crd.Spec.Cluster.Etcd.Domain
+	} else if provider == azure {
+		crd, err := crdCLient.ProviderV1alpha1().AzureConfigs(crdNamespace).Get(clusterID, getOpts)
+		if err != nil {
+			fmt.Println()
+			return "", microerror.Maskf(err, "error getting azure crd for guest cluster %s", clusterID)
+		}
+		etcdEndpoint = crd.Spec.Cluster.Etcd.Domain
+	} else if provider == kvm {
+		crd, err := crdCLient.ProviderV1alpha1().KVMConfigs(crdNamespace).Get(clusterID, getOpts)
+		if err != nil {
+			fmt.Println()
+			return "", microerror.Maskf(err, "error getting kvm crd for guest cluster %s", clusterID)
+		}
+		etcdEndpoint = crd.Spec.Cluster.Etcd.Domain
 	}
-	return ingress.Spec.Rules[0].Host, nil
+	// we already check for unknown provider at the start
+
+	return etcdEndpoint, nil
 }
 
 // create cert files in tmp dir from certConfig and saves filenames back
