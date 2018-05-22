@@ -149,7 +149,7 @@ func (s *Service) BackupGuestClusters() error {
 			continue
 		}
 		if !versionSupported {
-			s.Logger.Log("level", "warning", "msg", "Cluster "+clusterID+" is too old for etcd backup.")
+			s.Logger.Log("level", "warning", "msg", "Cluster "+clusterID+" is too old for etcd backup. Skipping.")
 			continue
 		}
 
