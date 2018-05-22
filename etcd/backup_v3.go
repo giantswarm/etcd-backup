@@ -69,6 +69,7 @@ func (b *EtcdBackupV3) Create() error {
 	b.Logger.Log("level", "info", "msg", "Etcd v3 backup created successfully")
 	return nil
 }
+
 // encrypt backup
 func (b *EtcdBackupV3) Encrypt() error {
 	if b.EncPass == "" {
