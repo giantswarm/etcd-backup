@@ -1,15 +1,17 @@
 package etcd
 
 import (
-	"log"
 	"path/filepath"
 
 	"github.com/giantswarm/etcd-backup/config"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 	"github.com/mholt/archiver"
 )
 
 type EtcdBackupV2 struct {
+	Logger micrologger.Logger
+
 	Aws      config.AWSConfig
 	Prefix   string
 	Filename string
@@ -34,7 +36,7 @@ func (b *EtcdBackupV2) Create() error {
 		"--backup-dir", filepath.Join(b.TmpDir, b.Filename),
 	}
 
-	_, err := execCmd(etcdctlCmd, etcdctlArgs, etcdctlEnvs)
+	_, err := execCmd(etcdctlCmd, etcdctlArgs, etcdctlEnvs, b.Logger)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -48,13 +50,13 @@ func (b *EtcdBackupV2) Create() error {
 	// Update Filename in etcd object.
 	b.Filename = b.Filename + tgzExt
 
-	log.Print("Etcd v2 etcd created successfully")
+	b.Logger.Log("level", "info", "msg", "Etcd v2 etcd created successfully")
 	return nil
 }
 
 func (b *EtcdBackupV2) Encrypt() error {
 	if b.EncPass == "" {
-		log.Print("No passphrase provided. Skipping etcd v2 backup encryption")
+		b.Logger.Log("level", "warning", "msg", "No passphrase provided. Skipping etcd v2 backup encryption")
 		return nil
 	}
 
@@ -70,7 +72,7 @@ func (b *EtcdBackupV2) Encrypt() error {
 	// Update Filename in etcd object.
 	b.Filename = b.Filename + encExt
 
-	log.Print("Etcd v2 backup encrypted successfully")
+	b.Logger.Log("level", "info", "msg", "Etcd v2 backup encrypted successfully")
 	return nil
 }
 
@@ -79,12 +81,12 @@ func (b *EtcdBackupV2) Upload() error {
 	fpath := filepath.Join(b.TmpDir, b.Filename)
 
 	// Upload
-	err := uploadToS3(fpath, b.Aws)
+	err := uploadToS3(fpath, b.Aws, b.Logger)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	log.Print("Etcd v2 backup uploaded successfully")
+	b.Logger.Log("level", "info", "msg", "Etcd v2 backup uploaded successfully")
 	return nil
 }
 

@@ -2,8 +2,8 @@ package etcd
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -15,6 +15,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/etcd-backup/config"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 	"golang.org/x/crypto/openpgp"
 )
 
@@ -36,8 +37,8 @@ func getTimeStamp() string {
 // - cmd  - command to execute
 // - args - arguments for command
 // - envs - envronment variables
-func execCmd(cmd string, args []string, envs []string) ([]byte, error) {
-	log.Printf("Executing: %s %v\n", cmd, args)
+func execCmd(cmd string, args []string, envs []string, logger micrologger.Logger) ([]byte, error) {
+	logger.Log("level", "info", "msg", fmt.Sprintf("Executing: %s %v\n", cmd, args))
 
 	// Create cmd and add environment.
 	c := exec.Command(cmd, args...)
@@ -46,8 +47,7 @@ func execCmd(cmd string, args []string, envs []string) ([]byte, error) {
 	// Execute and get output.
 	stdOutErr, err := c.CombinedOutput()
 	if err != nil {
-		log.Printf("%s", stdOutErr)
-		log.Print(err)
+		logger.Log("level", "error", "msg", "execCmd failed", "reason", fmt.Sprintf("%s", stdOutErr), "err", err)
 		return stdOutErr, microerror.Mask(err)
 	}
 	return stdOutErr, nil
@@ -57,7 +57,7 @@ func execCmd(cmd string, args []string, envs []string) ([]byte, error) {
 // Arguments:
 // - fpath - full path to target file
 // - p     - paramsAWS struct with AWS keys and bucket name
-func uploadToS3(fpath string, p config.AWSConfig) error {
+func uploadToS3(fpath string, p config.AWSConfig, logger micrologger.Logger) error {
 	// Login to AWS S3
 	creds := credentials.NewStaticCredentials(p.AccessKey, p.SecretKey, "")
 	_, err := creds.Get()
@@ -98,7 +98,7 @@ func uploadToS3(fpath string, p config.AWSConfig) error {
 		return microerror.Mask(err)
 	}
 
-	log.Printf("AWS S3: object %s successfully uploaded to bucket %s", path, p.Bucket)
+	logger.Log("level", "info", "msg", fmt.Sprintf("AWS S3: object %s successfully uploaded to bucket %s", path, p.Bucket))
 	return nil
 }
 

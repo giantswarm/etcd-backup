@@ -64,6 +64,8 @@ func (s *Service) BackupHostCluster() error {
 	// V2 etcd.
 	if !s.SkipV2 {
 		v2 := etcd.EtcdBackupV2{
+			Logger: s.Logger,
+
 			Aws: config.AWSConfig{
 				AccessKey: s.AwsAccessKey,
 				SecretKey: s.AwsSecretKey,
@@ -84,6 +86,8 @@ func (s *Service) BackupHostCluster() error {
 
 	// V3 etcd.
 	v3 := etcd.EtcdBackupV3{
+		Logger: s.Logger,
+
 		Aws: config.AWSConfig{
 			AccessKey: s.AwsAccessKey,
 			SecretKey: s.AwsSecretKey,
@@ -172,6 +176,8 @@ func (s *Service) BackupGuestClusters() error {
 		}
 		// backup config, we only care about etcd3 in guest cluster
 		backupConfig := etcd.EtcdBackupV3{
+			Logger: s.Logger,
+
 			Aws: config.AWSConfig{
 				AccessKey: s.AwsAccessKey,
 				SecretKey: s.AwsSecretKey,
