@@ -48,6 +48,15 @@
   version = "v1.13.50"
 
 [[projects]]
+  name = "github.com/coreos/go-semver"
+  packages = [
+    ".",
+    "semver"
+  ]
+  revision = "8ab6407b697782a06568d4b7f1db25550ec2e4c6"
+  version = "v0.2.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/dsnet/compress"
   packages = [
@@ -514,6 +523,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f236539cbcd03b62477dd5e00890a03a55f7d4529277798adbbe955448cfd035"
+  inputs-digest = "319fd459c28b18a54b7f6071beae95f86668ab4ebebb69a15c17b10547c156a5"
   solver-name = "gps-cdcl"
   solver-version = 1

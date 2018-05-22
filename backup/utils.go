@@ -6,14 +6,16 @@ import (
 	"log"
 	"os"
 
+	"github.com/coreos/go-semver/semver"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
+
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/client/k8sclient"
 	"github.com/giantswarm/operatorkit/client/k8srestconfig"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
 )
 
 // Create temporary directory where all file related magic happens.
@@ -75,6 +77,45 @@ func CreateCRDClient(logger micrologger.Logger) (*versioned.Clientset, error) {
 	return g8sClient, nil
 }
 
+// check if cluster release version has guest cluster backup support
+func CheckClusterVersionSupport(clusterID string, provider string, crdCLient *versioned.Clientset) (bool, error) {
+	getOpts := metav1.GetOptions{}
+
+	if provider == aws {
+		crd, err := crdCLient.ProviderV1alpha1().AWSConfigs(crdNamespace).Get(clusterID, getOpts)
+		if err != nil {
+			return false, microerror.Maskf(err, "failed to get aws crd"+clusterID)
+		}
+		crdVersion := semver.New(crd.Spec.VersionBundle.Version)
+		if crdVersion.Compare(*awsSupportFrom) >= 0 {
+			// version has support
+			return true, nil
+		} else {
+			// version doesnt have support
+			return false, nil
+		}
+
+	} else if provider == azure {
+		crd, err := crdCLient.ProviderV1alpha1().AzureConfigs(crdNamespace).Get(clusterID, getOpts)
+		if err != nil {
+			return false, microerror.Maskf(err, "failed to get azure crd "+clusterID)
+		}
+
+		crdVersion := semver.New(crd.Spec.VersionBundle.Version)
+		if crdVersion.Compare(*azureSupportFrom) >= 0 {
+			// version has support
+			return true, nil
+		} else {
+			// version doesnt have support
+			return false, nil
+		}
+
+	} else if provider == kvm {
+		// kvm backups are always supported
+		return true, nil
+	}
+}
+
 // fetch all guest clusters ids in host cluster
 func GetAllGuestClusters(provider string, crdCLient *versioned.Clientset) ([]string, error) {
 	var clusterList []string
@@ -134,31 +175,33 @@ func FetchCerts(clusterID string, k8sClient kubernetes.Interface) (*k8sclient.TL
 // fetch guest cluster etcd endpoint
 func GetEtcdEndpoint(clusterID string, provider string, crdCLient *versioned.Clientset) (string, error) {
 	getOpts := metav1.GetOptions{}
-	var etcdDomain string
-
+	var etcdEndpoint string
 	if provider == aws {
 		crd, err := crdCLient.ProviderV1alpha1().AWSConfigs(crdNamespace).Get(clusterID, getOpts)
 		if err != nil {
 			fmt.Println()
 			return "", microerror.Maskf(err, "error getting aws crd for guest cluster %s", clusterID)
 		}
-		etcdDomain = crd.Spec.Cluster.Etcd.Domain
+		etcdEndpoint = AwsEtcdEndpoint(crd.Spec.Cluster.Etcd.Domain)
+
 	} else if provider == azure {
 		crd, err := crdCLient.ProviderV1alpha1().AzureConfigs(crdNamespace).Get(clusterID, getOpts)
 		if err != nil {
 			fmt.Println()
 			return "", microerror.Maskf(err, "error getting azure crd for guest cluster %s", clusterID)
 		}
-		etcdDomain = crd.Spec.Cluster.Etcd.Domain
+		etcdEndpoint = AzureEtcdEndpoint(crd.Spec.Cluster.Etcd.Domain)
+
 	} else if provider == kvm {
 		crd, err := crdCLient.ProviderV1alpha1().KVMConfigs(crdNamespace).Get(clusterID, getOpts)
 		if err != nil {
 			fmt.Println()
 			return "", microerror.Maskf(err, "error getting kvm crd for guest cluster %s", clusterID)
 		}
-		etcdDomain = crd.Spec.Cluster.Etcd.Domain
+		etcdEndpoint = KVMEtcdEndpoint(crd.Spec.Cluster.Etcd.Domain)
+
 	}
-	etcdEndpoint := fmt.Sprintf("https://%s:2379", etcdDomain)
+
 	// we already check for unknown provider at the start
 
 	return etcdEndpoint, nil

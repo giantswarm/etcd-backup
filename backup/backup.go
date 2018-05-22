@@ -136,6 +136,18 @@ func (s *Service) BackupGuestClusters() error {
 
 	// iterate over all clusters
 	for _, clusterID := range clusterList {
+		// check if the cluster release version has support for etcd backup
+		versionSupported, err := CheckClusterVersionSupport(clusterID, s.Provider, crdClient)
+		if err != nil {
+			failed = true
+			s.Logger.Log("level", "error", "msg", "Failed to check release version for cluster "+clusterID, "reason", err)
+			continue
+		}
+		if !versionSupported {
+			s.Logger.Log("level", "warning", "msg", "Cluster "+clusterID+" is too old for etcd backup.")
+			continue
+		}
+
 		// fetch etcd certs
 		certs, err := FetchCerts(clusterID, k8sClient)
 		if err != nil {

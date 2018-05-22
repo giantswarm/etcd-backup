@@ -2,6 +2,7 @@ package backup
 
 import (
 	"fmt"
+	"github.com/coreos/go-semver/semver"
 	"path"
 )
 
@@ -20,6 +21,9 @@ const (
 	fileMode = 0600
 )
 
+var awsSupportFrom *semver.Version = semver.Must(semver.NewVersion(""))
+var azureSupportFrom *semver.Version = semver.Must(semver.NewVersion(""))
+
 func BackupPrefix(clusterID string) string {
 	return "-" + clusterID
 }
@@ -34,4 +38,14 @@ func CAFile(clusterID string, tmpDir string) string {
 
 func KeyFile(clusterID string, tmpDir string) string {
 	return path.Join(tmpDir, fmt.Sprintf("%s-%s.pem", clusterID, "key"))
+}
+
+func AwsEtcdEndpoint(etcdDomain string) string {
+	return fmt.Sprintf("https://%s:2379", etcdDomain)
+}
+func AzureEtcdEndpoint(etcdDomain string) string {
+	return fmt.Sprintf("https://%s:2379", etcdDomain)
+}
+func KVMEtcdEndpoint(etcdDomain string) string {
+	return fmt.Sprintf("https://%s:443", etcdDomain)
 }

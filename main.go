@@ -53,6 +53,7 @@ func main() {
 	flag.StringVar(&f.EtcdV3Endpoints, "etcd-v3-endpoints", "http://127.0.0.1:2379", "Endpoints for etcd connection")
 	flag.StringVar(&f.Prefix, "prefix", "", "[mandatory] Prefix to use in etcd filenames")
 	flag.StringVar(&f.Provider, "provider", "", "[mandatory] provider (aws, azure or kvm)")
+	flag.BoolVar(&f.SkipV2, "skip-v2", false, "flag for skipping etcd v2 backup")
 
 	flag.BoolVar(&f.Help, "help", false, "Print usage and exit")
 
