@@ -114,6 +114,7 @@ func CheckClusterVersionSupport(clusterID string, provider string, crdCLient *ve
 		// kvm backups are always supported
 		return true, nil
 	}
+	return false, nil
 }
 
 // fetch all guest clusters ids in host cluster
