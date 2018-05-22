@@ -1,11 +1,11 @@
 package backup
 
 import (
+	"fmt"
 	"github.com/giantswarm/etcd-backup/config"
 	"github.com/giantswarm/etcd-backup/etcd"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"log"
 	"time"
 )
 
@@ -133,6 +133,7 @@ func (s *Service) BackupGuestClusters() error {
 	if err != nil {
 		return microerror.Mask(err)
 	}
+	s.Logger.Log("level", "info", "msg", fmt.Sprintf("Guest cluster list: %#v", clusterList))
 
 	// backup failed flag, we want to know if any of the backup failed,
 	// but  one failed guest cluster should not cancel backup of the rest
@@ -208,7 +209,7 @@ func (s *Service) BackupGuestClusters() error {
 		time.Sleep(time.Minute * 5)
 		return failedBackupError
 	} else {
-		log.Printf("Finished guest cluster backup. Total guest clusters: %d", len(clusterList))
+		s.Logger.Log("level", "info", "msg", fmt.Sprintf("Finished guest cluster backup. Total guest clusters: %d", len(clusterList)))
 	}
 
 	return nil
