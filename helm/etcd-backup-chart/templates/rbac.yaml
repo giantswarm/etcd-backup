@@ -26,12 +26,6 @@ rules:
       - "get"
       - "list"
   - apiGroups:
-      - "extensions"
-    resources:
-      - ingresses
-    verbs:
-      - get
-  - apiGroups:
       - ""
     resources:
       - secrets
