@@ -21,7 +21,7 @@ const (
 	fileMode = 0600
 )
 
-var awsSupportFrom *semver.Version = semver.Must(semver.NewVersion("4.0.0"))
+var awsSupportFrom *semver.Version = semver.Must(semver.NewVersion("3.1.1"))
 var azureSupportFrom *semver.Version = semver.Must(semver.NewVersion("1.0.0"))
 
 func BackupPrefix(clusterID string) string {
