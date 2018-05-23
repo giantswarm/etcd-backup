@@ -24,6 +24,7 @@ type AWSConfig struct {
 
 type Flags struct {
 	Prefix          string
+	GuestBackup     bool
 	EtcdV2DataDir   string
 	EtcdV3Cert      string
 	EtcdV3CACert    string

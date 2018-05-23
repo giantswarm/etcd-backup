@@ -38,7 +38,7 @@ func getTimeStamp() string {
 // - args - arguments for command
 // - envs - envronment variables
 func execCmd(cmd string, args []string, envs []string, logger micrologger.Logger) ([]byte, error) {
-	logger.Log("level", "info", "msg", fmt.Sprintf("Executing: %s %v\n", cmd, args))
+	logger.Log("level", "info", "msg", fmt.Sprintf("Executing: %s %v", cmd, args))
 
 	// Create cmd and add environment.
 	c := exec.Command(cmd, args...)
