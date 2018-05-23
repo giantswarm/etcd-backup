@@ -20,8 +20,8 @@ const backupFailedCode = 1
 var (
 	description string = "Application to backup etcd."
 	gitCommit   string = "n/a"
-	name        string = "etcd-etcd"
-	source      string = "https://github.com/giantswarm/backup-etcd"
+	name        string = "etcd-backup"
+	source      string = "https://github.com/giantswarm/etcd-backup"
 )
 
 var (
