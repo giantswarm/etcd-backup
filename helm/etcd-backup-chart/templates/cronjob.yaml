@@ -11,7 +11,7 @@ spec:
   jobTemplate:
     spec:
       # Job timeout
-      activeDeadlineSeconds: 120
+      activeDeadlineSeconds: 300
       template:
         spec:
           tolerations:
@@ -26,18 +26,15 @@ spec:
           # to etcd data directory. To achive that,
           # mount /var/lib/etcd3 as a volume.
           nodeSelector:
-            # We need to switch to proper label below
-            # when all clusters will have one.
-            #
-            # node-role.kubernetes.io/master: ""
-            role: master
+            node-role.kubernetes.io/master: ""
           serviceAccountName: etcd-backup
           containers:
           - name: etcd-backup
-            # Use latest tag as w/a for https://github.com/giantswarm/architect/issues/135
-            image: quay.io/giantswarm/etcd-backup:latest
+            image: quay.io/giantswarm/etcd-backup:[[ .SHA ]]
             args:
+            - -guest-backup=true
             - -prefix={{ .Values.Installation.V1.Infra.EtcdBackup.ClusterPrefix }}
+            - -provider={{ .Values.Installation.V1.Provider.Kind }}
             - -etcd-v2-datadir=/var/lib/etcd
             - -etcd-v3-endpoints={{ .Values.Installation.V1.Infra.EtcdBackup.EtcdEndpoints }}
             - -etcd-v3-cacert=/certs/{{ .Values.Installation.V1.Infra.EtcdBackup.ClientCaCertFileName }}

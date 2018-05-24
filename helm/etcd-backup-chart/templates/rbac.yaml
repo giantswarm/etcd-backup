@@ -10,3 +10,37 @@ roleRef:
   kind: ClusterRole
   name: privileged-psp-user
   apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: etcd-backup
+rules:
+  - apiGroups:
+      - provider.giantswarm.io
+    resources:
+      - awsconfigs
+      - kvmconfigs
+      - azureconfigs
+    verbs:
+      - "get"
+      - "list"
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: etcd-backup
+subjects:
+  - kind: ServiceAccount
+    name: etcd-backup
+    namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: etcd-backup
+  apiGroup: rbac.authorization.k8s.io
