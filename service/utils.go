@@ -88,7 +88,11 @@ func CheckClusterVersionSupport(clusterID string, provider string, crdCLient *ve
 			if err != nil {
 				return false, microerror.Maskf(err, "failed to get aws crd"+clusterID)
 			}
-			crdVersion := semver.New(crd.Spec.VersionBundle.Version)
+			crdVersionStr := crd.Spec.VersionBundle.Version
+			if crdVersionStr == "" {
+				crdVersionStr = "0.0.0"
+			}
+			crdVersion := semver.New(crdVersionStr)
 			if crdVersion.Compare(*awsSupportFrom) >= 0 {
 				// version has support
 				return true, nil
@@ -103,8 +107,11 @@ func CheckClusterVersionSupport(clusterID string, provider string, crdCLient *ve
 			if err != nil {
 				return false, microerror.Maskf(err, "failed to get azure crd "+clusterID)
 			}
-
-			crdVersion := semver.New(crd.Spec.VersionBundle.Version)
+			crdVersionStr := crd.Spec.VersionBundle.Version
+			if crdVersionStr == "" {
+				crdVersionStr = "0.0.0"
+			}
+			crdVersion := semver.New(crdVersionStr)
 			if crdVersion.Compare(*azureSupportFrom) >= 0 {
 				// version has support
 				return true, nil
