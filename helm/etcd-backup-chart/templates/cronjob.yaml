@@ -32,7 +32,9 @@ spec:
           - name: etcd-backup
             image: quay.io/giantswarm/etcd-backup:[[ .SHA ]]
             args:
-            - -guest-backup=true
+            # backup guest clusters only on production instalations
+            # testing installation can have many broken guest clusters
+            - -guest-backup={{ not .Values.Installation.V1.Infra.TestingEnvironment }}
             - -prefix={{ .Values.Installation.V1.Infra.EtcdBackup.ClusterPrefix }}
             - -provider={{ .Values.Installation.V1.Provider.Kind }}
             - -etcd-v2-datadir=/var/lib/etcd
