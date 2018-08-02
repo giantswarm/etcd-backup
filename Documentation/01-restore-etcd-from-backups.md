@@ -5,7 +5,7 @@
 - etcd cluster 3+ nodes (Healthy or broken).
 - backups files for v2 and v3 stores.
 
-## Restoring a host cluster (multiple etcd members)
+## Restoring a cluster (multiple etcd members)
 
 This guide was written for cluster with following nodes:
 - etcd node 1 - Name/UUID: 00000001, IP: 172.16.238.101
@@ -108,18 +108,21 @@ etcdctl --endpoints https://127.0.0.1:2379 member add 00000002 https://172.16.23
 etcdctl --endpoints https://127.0.0.1:2379 member list
 ```
 
-## Restoring a guest cluster (single etcd member)
+## Restoring a cluster (single etcd member)
 
-### Copy db backup from s3
-Find the [etcd backup to restore](https://s3.console.aws.amazon.com/s3/buckets/etcd-backups.giantswarm.io/?region=eu-central-1&tab=overview) and make it public. Copy the link and download in the master (wget). After download it, go to the permission tab and removes `Read` right for everyone to leave as before (not public).
+### Copy db backup to etcd node
+
 ```
-cd /tmp
-wget https://s3-eu-west-1.amazonaws.com/etcd-backups.giantswarm.io/<backup_name>.db.tar.gz
-tar -xvzf <BACKUP_FILE>.db.tar.gz
+scp <backup_name>.db.tar.gz $ETCD_NODE:/tmp
 ```
 
 ### Restore backup in tmp folder
 ```
+//SSH to the node and uncompress it
+cd /tmp
+
+tar -xvzf <backup_name>.db.tar.gz
+
 ETCDCTL_API=3 etcdctl snapshot restore <backup_name>.db \
   --cacert /etc/kubernetes/ssl/etcd/client-ca.pem \
   --cert /etc/kubernetes/ssl/etcd/client-crt.pem \
@@ -135,8 +138,9 @@ systemctl stop etcd3
 
 ### Copy etcd datadir
 ```
-$ rm -rf /var/lib/etcd/member/
-$ cp -R default.etcd/member/* /var/lib/etcd/member/
+rm -rf /var/lib/etcd/member/
+
+cp -R default.etcd/member/* /var/lib/etcd/member/
 ```
 
 ### Start etcd forcing new cluster data
