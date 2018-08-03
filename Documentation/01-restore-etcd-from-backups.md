@@ -108,7 +108,7 @@ etcdctl --endpoints https://127.0.0.1:2379 member add 00000002 https://172.16.23
 etcdctl --endpoints https://127.0.0.1:2379 member list
 ```
 
-## Restoring a cluster (single etcd member)
+## Restoring a single node etcd
 
 ### Copy db backup to etcd node
 
@@ -117,8 +117,8 @@ scp <backup_name>.db.tar.gz $ETCD_NODE:/tmp
 ```
 
 ### Restore backup in tmp folder
+Beforehand, ssh to the node.
 ```
-//SSH to the node and uncompress it
 cd /tmp
 
 tar -xvzf <backup_name>.db.tar.gz
