@@ -5,7 +5,7 @@
 - etcd cluster 3+ nodes (Healthy or broken).
 - backups files for v2 and v3 stores.
 
-## Restoring a cluster
+## Restoring a cluster (multiple etcd members)
 
 This guide was written for cluster with following nodes:
 - etcd node 1 - Name/UUID: 00000001, IP: 172.16.238.101
@@ -106,6 +106,57 @@ etcdctl --endpoints https://127.0.0.1:2379 member add 00000002 https://172.16.23
 
 # Check that node successfully added to cluster (wait at least 30 seconds)
 etcdctl --endpoints https://127.0.0.1:2379 member list
+```
+
+## Restoring a single node etcd
+
+### Copy db backup to etcd node
+
+```
+scp <backup_name>.db.tar.gz $ETCD_NODE:/tmp
+```
+
+### Restore backup in tmp folder
+Beforehand, ssh to the node.
+```
+cd /tmp
+
+tar -xvzf <backup_name>.db.tar.gz
+
+ETCDCTL_API=3 etcdctl snapshot restore <backup_name>.db \
+  --cacert /etc/kubernetes/ssl/etcd/client-ca.pem \
+  --cert /etc/kubernetes/ssl/etcd/client-crt.pem \
+  --key /etc/kubernetes/ssl/etcd/client-key.pem
+```
+
+**NOTE: All commands below should be executed from root user. Use `sudo -i` to become root.**
+
+### Stop etcd unit
+```
+systemctl stop etcd3
+```
+
+### Copy etcd datadir
+```
+rm -rf /var/lib/etcd/member/
+
+cp -R default.etcd/member/* /var/lib/etcd/member/
+```
+
+### Start etcd forcing new cluster data
+```
+# As per official etcd guide, first start cluster with --force-new-cluster flag, to initialize new cluster for existing data.
+sed -i '/--trusted-ca-file/a\ \   --force-new-cluster\ \\' /etc/systemd/system/etcd3.service
+
+systemctl daemon-reload
+
+systemctl start etcd3
+```
+
+### Cleanup etcd unit
+
+```
+sed -i '/--force-new-cluster\ \\/d' /etc/systemd/system/etcd3.service
 ```
 
 ## Links
