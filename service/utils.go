@@ -142,7 +142,7 @@ func GetAllGuestClusters(provider string, crdCLient *versioned.Clientset) ([]str
 				return []string{}, microerror.Maskf(err, "failed to list aws crd")
 			}
 			for _, awsConfig := range crdList.Items {
-				fmt.Sprintf("deletion timestamp check %#v %#v", awsConfig.DeletionTimestamp, *awsConfig.DeletionTimestamp)
+				fmt.Sprintf("deletion timestamp check %#v", awsConfig.DeletionTimestamp)
 				clusterList = append(clusterList, awsConfig.Name)
 			}
 			break
