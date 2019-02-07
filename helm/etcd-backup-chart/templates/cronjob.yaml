@@ -7,11 +7,12 @@ spec:
   # Run everyday at 3AM.
   schedule: "{{ .Values.Installation.V1.Infra.EtcdBackup.CronSchedule }}"
   successfulJobsHistoryLimit: 2
-  failedJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 2
   jobTemplate:
     spec:
       # Job timeout
       activeDeadlineSeconds: 300
+      ttlSecondsAfterFinished: 79200
       template:
         spec:
           tolerations:
