@@ -11,7 +11,7 @@ spec:
   jobTemplate:
     spec:
       # Job timeout
-      activeDeadlineSeconds: 300
+      activeDeadlineSeconds: 600
       template:
         spec:
           tolerations:
