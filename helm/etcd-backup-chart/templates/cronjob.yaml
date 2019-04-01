@@ -4,8 +4,8 @@ metadata:
   name: etcd-backup
   namespace: kube-system
 spec:
-  # Run everyday at 3AM.
-  schedule: "{{ .Values.Installation.V1.Infra.EtcdBackup.CronSchedule }}"
+  # Run every six hours.
+  schedule: "0 */6 * * *"
   successfulJobsHistoryLimit: 2
   failedJobsHistoryLimit: 2
   jobTemplate:
