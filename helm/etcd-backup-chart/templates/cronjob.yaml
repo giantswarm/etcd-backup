@@ -11,7 +11,7 @@ spec:
   jobTemplate:
     spec:
       # Job timeout
-      TTLAfterFinished: 86400
+      TTLAfterFinished: 21600
       activeDeadlineSeconds: 600
       template:
         spec:
