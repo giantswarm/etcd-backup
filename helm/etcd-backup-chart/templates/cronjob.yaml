@@ -10,6 +10,8 @@ spec:
   failedJobsHistoryLimit: 2
   jobTemplate:
     spec:
+      # Cleaning jobs after 6h, same schedule period
+      ttlSecondsAfterFinished: 21600
       # Job timeout
       activeDeadlineSeconds: 600
       template:
