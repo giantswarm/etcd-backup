@@ -2,11 +2,12 @@ package service
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/giantswarm/etcd-backup/config"
 	"github.com/giantswarm/etcd-backup/etcd"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"time"
 )
 
 type Service struct {
@@ -24,6 +25,7 @@ type Service struct {
 	EncryptPass     string
 	Prefix          string
 	Provider        string
+	Retries         int
 
 	Help   bool
 	SkipV2 bool
@@ -45,6 +47,7 @@ func CreateService(f config.Flags, logger micrologger.Logger) *Service {
 		EtcdV3Endpoints: f.EtcdV3Endpoints,
 		Prefix:          f.Prefix,
 		Provider:        f.Provider,
+		Retries:         f.Retries,
 
 		SkipV2: f.SkipV2,
 	}
@@ -102,8 +105,9 @@ func (s *Service) BackupHostCluster() error {
 		Key:       s.EtcdV3Key,
 		TmpDir:    tmpDir,
 	}
+
 	// run backup task
-	err = etcd.FullBackup(&v3)
+	err = backupv3WithRetry(s.Retries, v3, s.Logger)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -136,7 +140,7 @@ func (s *Service) BackupGuestClusters() error {
 	s.Logger.Log("level", "info", "msg", fmt.Sprintf("Guest cluster list: %#v", clusterList))
 
 	// backup failed flag, we want to know if any of the backup failed,
-	// but  one failed guest cluster should not cancel backup of the rest
+	// but one failed guest cluster should not cancel backup of the rest
 	failed := false
 
 	// iterate over all clusters
@@ -195,22 +199,40 @@ func (s *Service) BackupGuestClusters() error {
 
 			TmpDir: tmpDir,
 		}
-		// run backup task
-		err = etcd.FullBackup(&backupConfig)
+
+		err = backupv3WithRetry(s.Retries, backupConfig, s.Logger)
 		if err != nil {
 			failed = true
 			s.Logger.Log("level", "error", "msg", "Failed to backup etcd cluster "+clusterID, "reason", err)
-			continue
 		}
-
 	}
+
 	// check if any backup failed
 	if failed {
-		time.Sleep(time.Minute * 5)
+		s.Logger.Log("level", "error", "msg", "Failed to backup all clusters", err)
 		return failedBackupError
 	} else {
 		s.Logger.Log("level", "info", "msg", fmt.Sprintf("Finished guest cluster backup. Total guest clusters: %d", len(clusterList)))
 	}
 
 	return nil
+}
+
+func backupv3WithRetry(retries int, v3 etcd.EtcdBackupV3, logger micrologger.Logger) error {
+	var err error
+	success := false
+	executedTimes := 0
+
+	for (executedTimes < retries) && (success == false) {
+		// run backup task
+		err = etcd.FullBackup(&v3)
+		if err != nil {
+			time.Sleep(time.Second * 20)
+		} else {
+			logger.Log("level", "info", "msg", "Cluster backup created for: "+v3.Prefix)
+			success = true
+		}
+		executedTimes++
+	}
+	return err
 }

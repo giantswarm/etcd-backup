@@ -2,8 +2,9 @@ package service
 
 import (
 	"fmt"
-	"github.com/coreos/go-semver/semver"
 	"path"
+
+	"github.com/coreos/go-semver/semver"
 )
 
 const (

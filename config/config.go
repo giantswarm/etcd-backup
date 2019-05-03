@@ -1,9 +1,10 @@
 package config
 
 import (
-	"github.com/giantswarm/microerror"
 	"log"
 	"os"
+
+	"github.com/giantswarm/microerror"
 )
 
 const (
@@ -37,6 +38,7 @@ type Flags struct {
 	EncryptPass     string
 	Help            bool
 	Provider        string
+	Retries         int
 	SkipV2          bool
 }
 

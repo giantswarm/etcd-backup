@@ -13,7 +13,7 @@ spec:
       # Cleaning jobs after 6h, same schedule period
       ttlSecondsAfterFinished: 21600
       # Job timeout
-      activeDeadlineSeconds: 600
+      activeDeadlineSeconds: 800
       template:
         spec:
           tolerations:
