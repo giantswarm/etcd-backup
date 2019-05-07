@@ -45,6 +45,14 @@
   version = "v1.16.26"
 
 [[projects]]
+  digest = "1:29fb1d9358f24856ab2a3747e2f3d97be41897b22b46bf20fbb984ba7be439af"
+  name = "github.com/cenkalti/backoff"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "2146c93394225c3732078705043ce9f26584d334"
+  version = "v2.2.0"
+
+[[projects]]
   digest = "1:0ef770954bca104ee99b3b6b7f9b240605ac03517d9f98cbc1893daa03f3c038"
   name = "github.com/coreos/go-semver"
   packages = ["semver"]
@@ -85,6 +93,14 @@
   ]
   pruneopts = "UT"
   revision = "1f1e998db676f6bfc5698286fd697f5b4c0a55e5"
+
+[[projects]]
+  branch = "master"
+  digest = "1:ab67fdefbc890c7880ffc2904048d7b9d14e29ebc716f8d637a17b16bb91d9e6"
+  name = "github.com/giantswarm/backoff"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "4763148864dc4815b691a69b4f60b4f4a8f88dad"
 
 [[projects]]
   branch = "master"
@@ -613,6 +629,7 @@
     "github.com/aws/aws-sdk-go/service/s3",
     "github.com/coreos/go-semver/semver",
     "github.com/giantswarm/apiextensions/pkg/clientset/versioned",
+    "github.com/giantswarm/backoff",
     "github.com/giantswarm/microerror",
     "github.com/giantswarm/micrologger",
     "github.com/giantswarm/operatorkit/client/k8sclient",
