@@ -142,12 +142,9 @@ func GetAllGuestClusters(provider string, crdCLient *versioned.Clientset) ([]str
 				return []string{}, microerror.Maskf(err, "failed to list aws crd")
 			}
 			for _, awsConfig := range crdList.Items {
-				// only backup cluster if status is created
-				conditions := awsConfig.Status.Cluster.Conditions
-				for _, clusterCondition := range conditions {
-					if clusterCondition.Type == "Created" {
-						clusterList = append(clusterList, awsConfig.Name)
-					}
+				// only backup cluster if it was not marked for delete
+				if awsConfig.DeletionTimestamp == nil {
+					clusterList = append(clusterList, awsConfig.Name)
 				}
 			}
 			break
@@ -159,12 +156,9 @@ func GetAllGuestClusters(provider string, crdCLient *versioned.Clientset) ([]str
 				return []string{}, microerror.Maskf(err, "failed to list azure crd")
 			}
 			for _, azureConfig := range crdList.Items {
-				// only backup cluster if status is created
-				conditions := azureConfig.Status.Cluster.Conditions
-				for _, clusterCondition := range conditions {
-					if clusterCondition.Type == "Created" {
-						clusterList = append(clusterList, azureConfig.Name)
-					}
+				// only backup cluster if it was not marked for delete
+				if azureConfig.DeletionTimestamp == nil {
+					clusterList = append(clusterList, azureConfig.Name)
 				}
 			}
 			break
@@ -176,12 +170,9 @@ func GetAllGuestClusters(provider string, crdCLient *versioned.Clientset) ([]str
 				return []string{}, microerror.Maskf(err, "failed to list azure crd")
 			}
 			for _, kvmConfig := range crdList.Items {
-				// only backup cluster if status is created
-				conditions := kvmConfig.Status.Cluster.Conditions
-				for _, clusterCondition := range conditions {
-					if clusterCondition.Type == "Created" {
-						clusterList = append(clusterList, kvmConfig.Name)
-					}
+				// only backup cluster if it was not marked for delete
+				if kvmConfig.DeletionTimestamp == nil {
+					clusterList = append(clusterList, kvmConfig.Name)
 				}
 			}
 			break

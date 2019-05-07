@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/etcd-backup/config"
 	"github.com/giantswarm/etcd-backup/etcd"
 	"github.com/giantswarm/microerror"
@@ -25,7 +26,6 @@ type Service struct {
 	EncryptPass     string
 	Prefix          string
 	Provider        string
-	Retries         int
 
 	Help   bool
 	SkipV2 bool
@@ -47,7 +47,6 @@ func CreateService(f config.Flags, logger micrologger.Logger) *Service {
 		EtcdV3Endpoints: f.EtcdV3Endpoints,
 		Prefix:          f.Prefix,
 		Provider:        f.Provider,
-		Retries:         f.Retries,
 
 		SkipV2: f.SkipV2,
 	}
@@ -107,7 +106,20 @@ func (s *Service) BackupHostCluster() error {
 	}
 
 	// run backup task
-	err = backupv3WithRetry(s.Retries, v3, s.Logger)
+	o := func() error {
+
+		err = etcd.FullBackup(&v3)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		s.Logger.Log("level", "info", "msg", "Cluster backup created for: "+v3.Prefix)
+		return nil
+	}
+
+	b := backoff.NewMaxRetries(retries, 20*time.Second)
+
+	err = backoff.Retry(o, b)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -200,7 +212,20 @@ func (s *Service) BackupGuestClusters() error {
 			TmpDir: tmpDir,
 		}
 
-		err = backupv3WithRetry(s.Retries, backupConfig, s.Logger)
+		o := func() error {
+
+			err = etcd.FullBackup(&backupConfig)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			s.Logger.Log("level", "info", "msg", "Cluster backup created for: "+clusterID)
+			return nil
+		}
+
+		b := backoff.NewMaxRetries(10, 20*time.Second)
+
+		err = backoff.Retry(o, b)
 		if err != nil {
 			failed = true
 			s.Logger.Log("level", "error", "msg", "Failed to backup etcd cluster "+clusterID, "reason", err)
@@ -216,23 +241,4 @@ func (s *Service) BackupGuestClusters() error {
 	}
 
 	return nil
-}
-
-func backupv3WithRetry(retries int, v3 etcd.EtcdBackupV3, logger micrologger.Logger) error {
-	var err error
-	success := false
-	executedTimes := 0
-
-	for (executedTimes < retries) && (success == false) {
-		// run backup task
-		err = etcd.FullBackup(&v3)
-		if err != nil {
-			time.Sleep(time.Second * 20)
-		} else {
-			logger.Log("level", "info", "msg", "Cluster backup created for: "+v3.Prefix)
-			success = true
-		}
-		executedTimes++
-	}
-	return err
 }

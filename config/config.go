@@ -38,7 +38,6 @@ type Flags struct {
 	EncryptPass     string
 	Help            bool
 	Provider        string
-	Retries         int
 	SkipV2          bool
 }
 
