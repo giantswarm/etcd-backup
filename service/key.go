@@ -2,8 +2,9 @@ package service
 
 import (
 	"fmt"
-	"github.com/coreos/go-semver/semver"
 	"path"
+
+	"github.com/coreos/go-semver/semver"
 )
 
 const (
@@ -19,6 +20,7 @@ const (
 	crdNamespace = "default"
 
 	fileMode = 0600
+	retries  = 10
 )
 
 var awsSupportFrom *semver.Version = semver.Must(semver.NewVersion("3.1.1"))

@@ -1,9 +1,10 @@
 package config
 
 import (
-	"github.com/giantswarm/microerror"
 	"log"
 	"os"
+
+	"github.com/giantswarm/microerror"
 )
 
 const (
