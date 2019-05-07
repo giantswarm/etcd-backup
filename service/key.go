@@ -20,7 +20,7 @@ const (
 	crdNamespace = "default"
 
 	fileMode = 0600
-	retries  = 10
+	retries  = 3
 )
 
 var awsSupportFrom *semver.Version = semver.Must(semver.NewVersion("3.1.1"))
