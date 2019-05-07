@@ -223,7 +223,7 @@ func (s *Service) BackupGuestClusters() error {
 			return nil
 		}
 
-		b := backoff.NewMaxRetries(10, 20*time.Second)
+		b := backoff.NewMaxRetries(retries, 20*time.Second)
 
 		err = backoff.Retry(o, b)
 		if err != nil {
