@@ -34,6 +34,8 @@ func (b *EtcdBackupV2) Create() error {
 		"backup",
 		"--data-dir", b.Datadir,
 		"--backup-dir", filepath.Join(b.TmpDir, b.Filename),
+		"--timeout", dialTimeout,
+		"--total-timeout", totalTimeout,
 	}
 
 	_, err := execCmd(etcdctlCmd, etcdctlArgs, etcdctlEnvs, b.Logger)

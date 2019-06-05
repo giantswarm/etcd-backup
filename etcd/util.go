@@ -25,6 +25,10 @@ const (
 	tgzExt     = ".tar.gz"
 	encExt     = ".enc"
 	dbExt      = ".db"
+
+	// Timeouts for etcdctl
+	dialTimeout  = "5s"
+	totalTimeout = "15s"
 )
 
 // Outputs timestamp.

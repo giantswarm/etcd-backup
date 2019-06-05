@@ -1,6 +1,7 @@
 package etcd
 
 import (
+	"fmt"
 	"path/filepath"
 
 	"github.com/giantswarm/etcd-backup/config"
@@ -31,7 +32,10 @@ func (b *EtcdBackupV3) Create() error {
 	// Full path to file.
 	fpath := filepath.Join(b.TmpDir, b.Filename)
 
-	etcdctlEnvs := []string{"ETCDCTL_API=3"}
+	etcdctlEnvs := []string{
+		"ETCDCTL_API=3",
+		fmt.Sprintf("ETCDCTL_DIAL_TIMEOUT=%s", dialTimeout),
+	}
 	etcdctlArgs := []string{
 		"snapshot",
 		"save",
