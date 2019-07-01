@@ -30,6 +30,9 @@ spec:
           nodeSelector:
             node-role.kubernetes.io/master: ""
           serviceAccountName: etcd-backup
+          securityContext:
+            userID: {{ .Values.userID }}
+            groupID: {{ .Values.groupID }}
           containers:
           - name: etcd-backup
             image: quay.io/giantswarm/etcd-backup:[[ .SHA ]]
