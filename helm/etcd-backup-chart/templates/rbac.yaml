@@ -44,3 +44,33 @@ roleRef:
   kind: ClusterRole
   name: etcd-backup
   apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: {{ .Values.name }}-psp
+  labels:
+    app: {{ .Values.name }}-psp
+    giantswarm.io/service-type: "managed"
+rules:
+  - apiGroups:
+      - extensions
+    resources:
+      - podsecuritypolicies
+    verbs:
+      - use
+    resourceNames:
+      - {{ .Values.name }}-psp
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Values.name }}-restricted-psp
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.name }}
+    namespace: {{ .Values.namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ .Values.name }}-psp
+  apiGroup: rbac.authorization.k8s.io
