@@ -1,8 +1,8 @@
 apiVersion: batch/v2alpha1
 kind: CronJob
 metadata:
-  name: etcd-backup
-  namespace: kube-system
+  name: {{ .Values.resource.default.name }}
+  namespace: {{ .Values.resource.default.namespace }}
 spec:
   # Run every six hours.
   schedule: "0 */6 * * *"
@@ -29,12 +29,12 @@ spec:
           # mount /var/lib/etcd3 as a volume.
           nodeSelector:
             node-role.kubernetes.io/master: ""
-          serviceAccountName: etcd-backup
+          serviceAccountName: {{ .Values.resource.default.name }}
           securityContext:
-            userID: {{ .Values.userID }}
-            groupID: {{ .Values.groupID }}
+            userID: {{ .Values.pod.user.id }}
+            groupID: {{ .Values.pod.user.id }}
           containers:
-          - name: etcd-backup
+          - name: {{ .Values.resource.default.name }}
             image: quay.io/giantswarm/etcd-backup:[[ .SHA ]]
             args:
             # backup guest clusters only on production instalations
@@ -81,4 +81,4 @@ spec:
           restartPolicy: Never
           hostNetwork: true
           imagePullSecrets:
-          - name: etcd-backup-pull-secret
+          - name: {{ .Values.resource.pullSecret.name }}
