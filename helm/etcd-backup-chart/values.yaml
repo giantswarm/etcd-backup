@@ -1,5 +1,14 @@
-name: etcd-backup
-namespace: kube-system
+resource:
+  default:
+    name: {{ .Release.Name }}
+    namespace: "kube-system"
+  psp:
+    name: {{ .Release.Name }}-psp
+  pullSecret:
+    name: {{ .Release.Name }}-pull-secret
 
-userID: 1000
-groupID: 1000
+pod:
+  user:
+    id: 0
+  group:
+    id: 1000
