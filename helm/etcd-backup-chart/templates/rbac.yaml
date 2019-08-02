@@ -1,16 +1,3 @@
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  name: etcd-backup-psp
-subjects:
-  - kind: ServiceAccount
-    name: etcd-backup
-    namespace: kube-system
-roleRef:
-  kind: ClusterRole
-  name: privileged-psp-user
-  apiGroup: rbac.authorization.k8s.io
----
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -48,9 +35,9 @@ roleRef:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
-  name: {{ .Values.name }}-psp
+  name: {{ .Values.resource.psp.name }}
   labels:
-    app: {{ .Values.name }}-psp
+    app: {{ .Values.resource.psp.name }}
     giantswarm.io/service-type: "managed"
 rules:
   - apiGroups:
@@ -60,17 +47,17 @@ rules:
     verbs:
       - use
     resourceNames:
-      - {{ .Values.name }}-psp
+      - {{ .Values.resource.psp.name }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ .Values.name }}-restricted-psp
+  name: {{ .Values.resource.default.name }}-restricted-psp
 subjects:
   - kind: ServiceAccount
-    name: {{ .Values.name }}
-    namespace: {{ .Values.namespace }}
+    name: {{ .Values.resource.default.name }}
+    namespace: {{ .Values.resource.default.namespace }}
 roleRef:
   kind: ClusterRole
-  name: {{ .Values.name }}-psp
+  name: {{ .Values.resource.psp.name }}
   apiGroup: rbac.authorization.k8s.io
