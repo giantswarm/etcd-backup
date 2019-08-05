@@ -1,11 +1,11 @@
 resource:
   default:
-    name: {{ .Release.Name }}
+    name: etcd-backup
     namespace: "kube-system"
   psp:
-    name: {{ .Release.Name }}-psp
+    name: etcd-backup-psp
   pullSecret:
-    name: {{ .Release.Name }}-pull-secret
+    name: etcd-backup-pull-secret
 
 pod:
   user:
