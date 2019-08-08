@@ -20,10 +20,10 @@ pod:
 #
 resource:
   default:
-    name: '{{ .Release.Name | replace "." "-" | trunc 47 }}'
+    name: etcd-backup
     namespace: "kube-system"
   psp:
-    name: '{{ .Release.Name | replace "." "-" | trunc 47 }}-psp'
+    name: etcd-backup-psp
   pullSecret:
-    name: '{{ .Release.Name | replace "." "-" | trunc 47 }}-secret'
+    name: etcd-backup-pull-secret
 
