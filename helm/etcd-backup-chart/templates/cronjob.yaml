@@ -1,7 +1,7 @@
 apiVersion: batch/v2alpha1
 kind: CronJob
 metadata:
-  name: {{ .Values.resource.default.name }}
+  name: {{ tpl .Values.resource.default.name . }}
   namespace: {{ .Values.resource.default.namespace }}
 spec:
   # Run every six hours.
@@ -29,13 +29,13 @@ spec:
           # mount /var/lib/etcd3 as a volume.
           nodeSelector:
             node-role.kubernetes.io/master: ""
-          serviceAccountName: {{ .Values.resource.default.name }}
+          serviceAccountName: {{ tpl .Values.resource.default.name . }}
           securityContext:
             userID: {{ .Values.pod.user.id }}
             groupID: {{ .Values.pod.user.id }}
           containers:
-          - name: {{ .Values.resource.default.name }}
-            image: quay.io/giantswarm/etcd-backup:[[ .SHA ]]
+          - name: {{ tpl .Values.resource.default.name . }}
+            image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
             args:
             # backup guest clusters only on production instalations
             # testing installation can have many broken guest clusters
@@ -58,17 +58,17 @@ spec:
               - name: ETCDBACKUP_AWS_ACCESS_KEY
                 valueFrom:
                   secretKeyRef:
-                    name: etcd-backup
+                    name: {{ tpl .Values.resource.default.name . }}
                     key: ETCDBACKUP_AWS_ACCESS_KEY
               - name: ETCDBACKUP_AWS_SECRET_KEY
                 valueFrom:
                   secretKeyRef:
-                    name: etcd-backup
+                    name: {{ tpl .Values.resource.default.name . }}
                     key: ETCDBACKUP_AWS_SECRET_KEY
               - name: ETCDBACKUP_PASSPHRASE
                 valueFrom:
                   secretKeyRef:
-                    name: etcd-backup
+                    name: {{ tpl .Values.resource.default.name . }}
                     key: ETCDBACKUP_PASSPHRASE
           volumes:
           - name: etcd-datadir
@@ -81,4 +81,4 @@ spec:
           restartPolicy: Never
           hostNetwork: true
           imagePullSecrets:
-          - name: {{ .Values.resource.pullSecret.name }}
+          - name: {{ tpl .Values.resource.pullSecret.name . }}
