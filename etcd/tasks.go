@@ -2,6 +2,7 @@ package etcd
 
 import (
 	"github.com/giantswarm/microerror"
+	"time"
 )
 
 func FullBackup(b BackupInterface) error {
@@ -9,19 +10,36 @@ func FullBackup(b BackupInterface) error {
 
 	version := b.Version()
 
+	start := time.Now()
+
 	err = b.Create()
 	if err != nil {
 		return microerror.Maskf(err, "Etcd %s creation failed: %s", version, err)
 	}
+
+	creationTime := time.Since(start).Nanoseconds() / 1e6
+
+	start = time.Now()
 
 	err = b.Encrypt()
 	if err != nil {
 		microerror.Maskf(err, "Etcd %s encryption failed: %s", version, err)
 	}
 
-	err = b.Upload()
+	encryptionTime := time.Since(start).Nanoseconds() / 1e6
+	start = time.Now()
+
+	size, err := b.Upload()
 	if err != nil {
 		microerror.Maskf(err, "Etcd %s upload failed: %s", version, err)
 	}
+
+	uploadTime := time.Since(start).Nanoseconds() / 1e6
+
+	err = b.SendMetrics(creationTime, encryptionTime, uploadTime, size)
+	if err != nil {
+		microerror.Maskf(err, "Etcd %s metrics push failed: %s", version, err)
+	}
+
 	return nil
 }

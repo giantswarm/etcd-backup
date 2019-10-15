@@ -2,6 +2,7 @@ package config
 
 import (
 	"log"
+	"net/url"
 	"os"
 
 	"github.com/giantswarm/microerror"
@@ -39,6 +40,8 @@ type Flags struct {
 	Help            bool
 	Provider        string
 	SkipV2          bool
+	PrometheusUrl   string
+	PrometheusJob   string
 }
 
 // parse
@@ -67,6 +70,22 @@ func CheckConfig(f Flags) error {
 		f.SkipV2 = true
 		log.Print("Skipping etcd V2 etcd as -etcd-v2-datadir is not set")
 		return microerror.Mask(invalidConfigError)
+	}
+
+	// check that the Prometheus Url is a valid URL
+	if f.PrometheusUrl != "" {
+		_, err := url.ParseRequestURI(f.PrometheusUrl)
+		if err != nil {
+			log.Fatalf("--prometheus-url is invalid")
+			return microerror.Mask(invalidConfigError)
+		}
+
+		if f.PrometheusJob == "" {
+			log.Fatalf("--prometheus-job is mandatory when --prometheus-url is set")
+			return microerror.Mask(invalidConfigError)
+		}
+	} else {
+		log.Print("Skipping prometheus metrics push as --prometheus-url is not set")
 	}
 
 	return nil

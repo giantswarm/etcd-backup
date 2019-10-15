@@ -55,6 +55,8 @@ func main() {
 	flag.StringVar(&f.Prefix, "prefix", "", "[mandatory] Prefix to use in etcd filenames")
 	flag.StringVar(&f.Provider, "provider", "", "[mandatory] provider (aws, azure or kvm)")
 	flag.BoolVar(&f.SkipV2, "skip-v2", false, "flag for skipping etcd v2 backup")
+	flag.StringVar(&f.PrometheusUrl, "prometheus-url", "", "URL of the Prometheus PUSH gateway (i.e. http://prometheus.example.com:9001)")
+	flag.StringVar(&f.PrometheusJob, "prometheus-job", "", "Job name for the Prometheus PUSH gateway (i.e. etcd_backup)")
 
 	flag.BoolVar(&f.Help, "help", false, "Print usage and exit")
 

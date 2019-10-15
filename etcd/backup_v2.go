@@ -12,12 +12,13 @@ import (
 type EtcdBackupV2 struct {
 	Logger micrologger.Logger
 
-	Aws      config.AWSConfig
-	Prefix   string
-	Filename string
-	Datadir  string
-	EncPass  string
-	TmpDir   string
+	Aws              config.AWSConfig
+	Prefix           string
+	Filename         string
+	Datadir          string
+	EncPass          string
+	TmpDir           string
+	PrometheusConfig PrometheusConfig
 }
 
 // Create etcd in temporary directory, tar and compress.
@@ -77,17 +78,21 @@ func (b *EtcdBackupV2) Encrypt() error {
 }
 
 // Upload resulted etcd to S3.
-func (b *EtcdBackupV2) Upload() error {
+func (b *EtcdBackupV2) Upload() (int64, error) {
 	fpath := filepath.Join(b.TmpDir, b.Filename)
 
 	// Upload
-	err := uploadToS3(fpath, b.Aws, b.Logger)
+	size, err := uploadToS3(fpath, b.Aws, b.Logger)
 	if err != nil {
-		return microerror.Mask(err)
+		return -1, microerror.Mask(err)
 	}
 
 	b.Logger.Log("level", "info", "msg", "Etcd v2 backup uploaded successfully")
-	return nil
+	return size, nil
+}
+
+func (b *EtcdBackupV2) SendMetrics(creationTime int64, encryptionTime int64, uploadTime int64, backupSize int64) error {
+	return sendMetrics(b.PrometheusConfig, creationTime, encryptionTime, uploadTime, backupSize)
 }
 
 func (b *EtcdBackupV2) Version() string {

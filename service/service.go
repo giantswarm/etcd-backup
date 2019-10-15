@@ -26,6 +26,8 @@ type Service struct {
 	EncryptPass     string
 	Prefix          string
 	Provider        string
+	PrometheusUrl   string
+	PrometheusJob   string
 
 	Help   bool
 	SkipV2 bool
@@ -47,6 +49,8 @@ func CreateService(f config.Flags, logger micrologger.Logger) *Service {
 		EtcdV3Endpoints: f.EtcdV3Endpoints,
 		Prefix:          f.Prefix,
 		Provider:        f.Provider,
+		PrometheusUrl:   f.PrometheusUrl,
+		PrometheusJob:   f.PrometheusJob,
 
 		SkipV2: f.SkipV2,
 	}
@@ -63,6 +67,11 @@ func (s *Service) BackupHostCluster() error {
 	}
 	defer ClearTMPDir(tmpDir)
 
+	prometheusConfig := etcd.PrometheusConfig{
+		Url: s.PrometheusUrl,
+		Job: s.PrometheusJob,
+	}
+
 	// V2 etcd.
 	if !s.SkipV2 {
 		v2 := etcd.EtcdBackupV2{
@@ -74,10 +83,11 @@ func (s *Service) BackupHostCluster() error {
 				Bucket:    s.AwsS3Bucket,
 				Region:    s.AwsS3Region,
 			},
-			Datadir: s.EtcdV2DataDir,
-			EncPass: s.EncryptPass,
-			Prefix:  s.Prefix,
-			TmpDir:  tmpDir,
+			Datadir:          s.EtcdV2DataDir,
+			EncPass:          s.EncryptPass,
+			Prefix:           s.Prefix,
+			TmpDir:           tmpDir,
+			PrometheusConfig: prometheusConfig,
 		}
 		// run backup task
 		err = etcd.FullBackup(&v2)
@@ -96,13 +106,14 @@ func (s *Service) BackupHostCluster() error {
 			Bucket:    s.AwsS3Bucket,
 			Region:    s.AwsS3Region,
 		},
-		CACert:    s.EtcdV3CACert,
-		Cert:      s.EtcdV3Cert,
-		Prefix:    s.Prefix,
-		EncPass:   s.EncryptPass,
-		Endpoints: s.EtcdV3Endpoints,
-		Key:       s.EtcdV3Key,
-		TmpDir:    tmpDir,
+		CACert:           s.EtcdV3CACert,
+		Cert:             s.EtcdV3Cert,
+		Prefix:           s.Prefix,
+		EncPass:          s.EncryptPass,
+		Endpoints:        s.EtcdV3Endpoints,
+		Key:              s.EtcdV3Key,
+		TmpDir:           tmpDir,
+		PrometheusConfig: prometheusConfig,
 	}
 
 	// run backup task
