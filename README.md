@@ -17,6 +17,8 @@ docker run --rm \
     -e ETCDBACKUP_PASSPHRASE=ZZZ \
     -v /var/lib/etcd:/var/lib/etcd \
     quay.io/giantswarm/etcd-backup \
+    -provider aws \
+    -aws-s3-region eu-west-1 \  
     -aws-s3-bucket bucket \
     -prefix cluster1 \
     -etcd-v3-endpoints http://172.17.0.1:2379 \
