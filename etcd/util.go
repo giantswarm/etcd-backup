@@ -155,21 +155,22 @@ func encryptFile(srcPath string, dstPart string, passphrase string) error {
 }
 
 var (
+	namespace    = "etcd_backup"
 	creationTime = prometheus.NewGauge(prometheus.GaugeOpts{
-		Name: "etcd_backup_creation_time_ms",
-		Help: "Time in ms that che backup creation process took.",
+		Name: prometheus.BuildFQName(namespace, "", "creation_time_ms"),
+		Help: "Gauge about the time in ms spent by the ETCD backup creation process.",
 	})
 	encryptionTime = prometheus.NewGauge(prometheus.GaugeOpts{
-		Name: "etcd_backup_encryption_time_ms",
-		Help: "Time in ms that che backup encryption process took.",
+		Name: prometheus.BuildFQName(namespace, "", "encryption_time_ms"),
+		Help: "Gauge about the time in ms spent by the ETCD backup encryption process.",
 	})
 	uploadTime = prometheus.NewGauge(prometheus.GaugeOpts{
-		Name: "etcd_backup_upload_time_ms",
-		Help: "Time in ms that che backup upload process took.",
+		Name: prometheus.BuildFQName(namespace, "", "upload_time_ms"),
+		Help: "Gauge about the time in ms spent by the ETCD backup upload process.",
 	})
 	backupSize = prometheus.NewGauge(prometheus.GaugeOpts{
-		Name: "etcd_backup_size",
-		Help: "The size in bytes of the backup file.",
+		Name: prometheus.BuildFQName(namespace, "", "size"),
+		Help: "Gauge about the size of the backup file, as seen by S3.",
 	})
 )
 
