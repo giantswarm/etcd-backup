@@ -7,8 +7,8 @@ services:
     working_dir: /etcd-backup
     environment:
       - ALLOW_NONE_AUTHENTICATION=yes
-      - ETCDBACKUP_AWS_ACCESS_KEY=AKIARHGREVJID64EME6O
-      - ETCDBACKUP_AWS_SECRET_KEY=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
+      - ETCDBACKUP_AWS_ACCESS_KEY=xxx
+      - ETCDBACKUP_AWS_SECRET_KEY=yyy
       - ETCDBACKUP_PASSPHRASE=ciccio
   prometheus:
     image: prom/prometheus:v2.13.1
