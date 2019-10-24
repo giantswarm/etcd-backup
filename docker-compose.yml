@@ -1,0 +1,25 @@
+version: '3.1'
+services:
+  etcd:
+    image: bitnami/etcd:3.4.3
+    volumes:
+      - .:/etcd-backup/
+    working_dir: /etcd-backup
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCDBACKUP_AWS_ACCESS_KEY=AKIARHGREVJID64EME6O
+      - ETCDBACKUP_AWS_SECRET_KEY=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
+      - ETCDBACKUP_PASSPHRASE=ciccio
+  prometheus:
+    image: prom/prometheus:v2.13.1
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - 9090:9090
+  pushgateway:
+    image: prom/pushgateway:v0.9.1
+    ports:
+      - 9091:9091
+
+
+

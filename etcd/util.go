@@ -169,7 +169,7 @@ var (
 		Help: "Gauge about the time in ms spent by the ETCD backup upload process.",
 	})
 	backupSize = prometheus.NewGauge(prometheus.GaugeOpts{
-		Name: prometheus.BuildFQName(namespace, "", "size"),
+		Name: prometheus.BuildFQName(namespace, "", "size_bytes"),
 		Help: "Gauge about the size of the backup file, as seen by S3.",
 	})
 )
@@ -187,10 +187,8 @@ func sendMetrics(prometheusConfig PrometheusConfig, creationTimeMeasurement int6
 		uploadTime.Set(float64(uploadTimeMeasurement))
 		backupSize.Set(float64(backupSizeMeasurement))
 
-		// Add is used here rather than Push to not delete a previously pushed
-		// success timestamp in case of a failure of this backup.
 		if err := pusher.Add(); err != nil {
-			fmt.Println("Could not push to Pushgateway:", err)
+			return err
 		}
 	}
 

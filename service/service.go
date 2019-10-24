@@ -49,8 +49,8 @@ func CreateService(f config.Flags, logger micrologger.Logger) *Service {
 		EtcdV3Endpoints: f.EtcdV3Endpoints,
 		Prefix:          f.Prefix,
 		Provider:        f.Provider,
-		PrometheusUrl:   f.PrometheusUrl,
-		PrometheusJob:   f.PrometheusJob,
+		PrometheusUrl:   f.PushGatewayURL,
+		PrometheusJob:   f.PushGatewayJob,
 
 		SkipV2: f.SkipV2,
 	}

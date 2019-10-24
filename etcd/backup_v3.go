@@ -1,6 +1,7 @@
 package etcd
 
 import (
+	"fmt"
 	"path/filepath"
 
 	"github.com/giantswarm/etcd-backup/config"
@@ -109,7 +110,13 @@ func (b *EtcdBackupV3) Upload() (int64, error) {
 }
 
 func (b *EtcdBackupV3) SendMetrics(creationTime int64, encryptionTime int64, uploadTime int64, backupSize int64) error {
-	return sendMetrics(b.PrometheusConfig, creationTime, encryptionTime, uploadTime, backupSize)
+	err := sendMetrics(b.PrometheusConfig, creationTime, encryptionTime, uploadTime, backupSize)
+
+	if err != nil {
+		b.Logger.Log("level", "error", "msg", fmt.Sprintf("Failed to push metrics to pushgateway: %s", err))
+	}
+
+	return err
 }
 
 func (b *EtcdBackupV3) Version() string {
