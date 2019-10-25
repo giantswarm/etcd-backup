@@ -17,31 +17,31 @@ const (
 //AWS config
 type AWSConfig struct {
 	AccessKey string
-	SecretKey string
 	Bucket    string
 	Region    string
+	SecretKey string
 }
 
 // Initialize parameters.
 
 type Flags struct {
-	Prefix          string
-	GuestBackup     bool
+	AwsAccessKey    string
+	AwsSecretKey    string
+	AwsS3Bucket     string
+	AwsS3Region     string
 	EtcdV2DataDir   string
 	EtcdV3Cert      string
 	EtcdV3CACert    string
 	EtcdV3Key       string
 	EtcdV3Endpoints string
-	AwsAccessKey    string
-	AwsSecretKey    string
-	AwsS3Bucket     string
-	AwsS3Region     string
 	EncryptPass     string
+	GuestBackup     bool
 	Help            bool
+	Prefix          string
 	Provider        string
-	SkipV2          bool
 	PushGatewayURL  string
 	PushGatewayJob  string
+	SkipV2          bool
 }
 
 // parse

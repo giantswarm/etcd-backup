@@ -11,15 +11,14 @@ import (
 )
 
 type EtcdBackupV2 struct {
-	Logger micrologger.Logger
-
 	Aws              config.AWSConfig
-	Prefix           string
-	Filename         string
 	Datadir          string
 	EncPass          string
-	TmpDir           string
+	Filename         string
+	Logger           micrologger.Logger
+	Prefix           string
 	PrometheusConfig PrometheusConfig
+	TmpDir           string
 }
 
 // Create etcd in temporary directory, tar and compress.

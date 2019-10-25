@@ -9,6 +9,6 @@ type BackupInterface interface {
 }
 
 type PrometheusConfig struct {
-	Url string
 	Job string
+	Url string
 }
