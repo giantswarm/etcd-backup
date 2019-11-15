@@ -22,6 +22,12 @@ type AWSConfig struct {
 	SecretKey string
 }
 
+// Push gateway address
+type PrometheusConfig struct {
+	Job string
+	Url string
+}
+
 // Initialize parameters.
 
 type Flags struct {

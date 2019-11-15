@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"github.com/giantswarm/etcd-backup/metrics"
 	"time"
 
 	"github.com/giantswarm/backoff"
@@ -14,20 +15,19 @@ import (
 type Service struct {
 	Logger micrologger.Logger
 
-	AwsAccessKey    string
-	AwsSecretKey    string
-	AwsS3Bucket     string
-	AwsS3Region     string
-	EtcdV2DataDir   string
-	EtcdV3Cert      string
-	EtcdV3CACert    string
-	EtcdV3Key       string
-	EtcdV3Endpoints string
-	EncryptPass     string
-	Prefix          string
-	Provider        string
-	PrometheusUrl   string
-	PrometheusJob   string
+	AwsAccessKey     string
+	AwsSecretKey     string
+	AwsS3Bucket      string
+	AwsS3Region      string
+	EtcdV2DataDir    string
+	EtcdV3Cert       string
+	EtcdV3CACert     string
+	EtcdV3Key        string
+	EtcdV3Endpoints  string
+	EncryptPass      string
+	Prefix           string
+	Provider         string
+	PrometheusConfig *config.PrometheusConfig
 
 	Help   bool
 	SkipV2 bool
@@ -49,8 +49,10 @@ func CreateService(f config.Flags, logger micrologger.Logger) *Service {
 		EtcdV3Endpoints: f.EtcdV3Endpoints,
 		Prefix:          f.Prefix,
 		Provider:        f.Provider,
-		PrometheusUrl:   f.PushGatewayURL,
-		PrometheusJob:   f.PushGatewayJob,
+		PrometheusConfig: &config.PrometheusConfig{
+			Job: f.PushGatewayJob,
+			Url: f.PushGatewayURL,
+		},
 
 		SkipV2: f.SkipV2,
 	}
@@ -67,11 +69,6 @@ func (s *Service) BackupHostCluster() error {
 	}
 	defer ClearTMPDir(tmpDir)
 
-	prometheusConfig := etcd.PrometheusConfig{
-		Url: s.PrometheusUrl,
-		Job: s.PrometheusJob,
-	}
-
 	// V2 etcd.
 	if !s.SkipV2 {
 		v2 := etcd.EtcdBackupV2{
@@ -83,16 +80,18 @@ func (s *Service) BackupHostCluster() error {
 				Bucket:    s.AwsS3Bucket,
 				Region:    s.AwsS3Region,
 			},
-			Datadir:          s.EtcdV2DataDir,
-			EncPass:          s.EncryptPass,
-			Prefix:           s.Prefix,
-			TmpDir:           tmpDir,
-			PrometheusConfig: prometheusConfig,
+			Datadir: s.EtcdV2DataDir,
+			EncPass: s.EncryptPass,
+			Prefix:  s.Prefix,
+			TmpDir:  tmpDir,
 		}
 		// run backup task
-		err = etcd.FullBackup(&v2)
+		err, backupMetrics := etcd.FullBackup(&v2)
 		if err != nil {
+			metrics.Send(s.PrometheusConfig, metrics.NewFailureMetrics(), "")
 			return microerror.Mask(err)
+		} else {
+			metrics.Send(s.PrometheusConfig, backupMetrics, "")
 		}
 	}
 
@@ -106,25 +105,26 @@ func (s *Service) BackupHostCluster() error {
 			Bucket:    s.AwsS3Bucket,
 			Region:    s.AwsS3Region,
 		},
-		CACert:           s.EtcdV3CACert,
-		Cert:             s.EtcdV3Cert,
-		Prefix:           s.Prefix,
-		EncPass:          s.EncryptPass,
-		Endpoints:        s.EtcdV3Endpoints,
-		Key:              s.EtcdV3Key,
-		TmpDir:           tmpDir,
-		PrometheusConfig: prometheusConfig,
+		CACert:    s.EtcdV3CACert,
+		Cert:      s.EtcdV3Cert,
+		Prefix:    s.Prefix,
+		EncPass:   s.EncryptPass,
+		Endpoints: s.EtcdV3Endpoints,
+		Key:       s.EtcdV3Key,
+		TmpDir:    tmpDir,
 	}
 
 	// run backup task
 	o := func() error {
 
-		err = etcd.FullBackup(&v3)
+		err, backupMetrics := etcd.FullBackup(&v3)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
 		s.Logger.Log("level", "info", "msg", "Cluster backup created for: "+v3.Prefix)
+
+		metrics.Send(s.PrometheusConfig, backupMetrics, "")
 		return nil
 	}
 
@@ -132,6 +132,7 @@ func (s *Service) BackupHostCluster() error {
 
 	err = backoff.Retry(o, b)
 	if err != nil {
+		metrics.Send(s.PrometheusConfig, metrics.NewFailureMetrics(), "")
 		return microerror.Mask(err)
 	}
 
@@ -225,12 +226,15 @@ func (s *Service) BackupGuestClusters() error {
 
 		o := func() error {
 
-			err = etcd.FullBackup(&backupConfig)
+			err, backupMetrics := etcd.FullBackup(&backupConfig)
 			if err != nil {
 				return microerror.Mask(err)
 			}
 
 			s.Logger.Log("level", "info", "msg", "Cluster backup created for: "+clusterID)
+
+			metrics.Send(s.PrometheusConfig, backupMetrics, clusterID)
+
 			return nil
 		}
 
@@ -240,6 +244,7 @@ func (s *Service) BackupGuestClusters() error {
 		if err != nil {
 			failed = true
 			s.Logger.Log("level", "error", "msg", "Failed to backup etcd cluster "+clusterID, "reason", err)
+			metrics.Send(s.PrometheusConfig, metrics.NewFailureMetrics(), clusterID)
 		}
 	}
 

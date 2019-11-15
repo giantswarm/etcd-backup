@@ -1,7 +1,6 @@
 package etcd
 
 import (
-	"fmt"
 	"path/filepath"
 
 	"github.com/giantswarm/etcd-backup/config"
@@ -11,17 +10,16 @@ import (
 )
 
 type EtcdBackupV3 struct {
-	Aws              config.AWSConfig
-	CACert           string
-	Cert             string
-	EncPass          string
-	Endpoints        string
-	Filename         string
-	Logger           micrologger.Logger
-	Key              string
-	Prefix           string
-	PrometheusConfig PrometheusConfig
-	TmpDir           string
+	Aws       config.AWSConfig
+	CACert    string
+	Cert      string
+	EncPass   string
+	Endpoints string
+	Filename  string
+	Logger    micrologger.Logger
+	Key       string
+	Prefix    string
+	TmpDir    string
 }
 
 // Create etcd in temporary directory.
@@ -106,16 +104,6 @@ func (b *EtcdBackupV3) Upload() (int64, error) {
 
 	b.Logger.Log("level", "info", "msg", "Etcd v3 backup uploaded successfully")
 	return size, nil
-}
-
-func (b *EtcdBackupV3) SendMetrics(creationTime int64, encryptionTime int64, uploadTime int64, backupSize int64) error {
-	err := sendMetrics(b.PrometheusConfig, creationTime, encryptionTime, uploadTime, backupSize)
-
-	if err != nil {
-		b.Logger.Log("level", "error", "msg", fmt.Sprintf("Failed to push metrics to pushgateway: %s", err))
-	}
-
-	return err
 }
 
 func (b *EtcdBackupV3) Version() string {

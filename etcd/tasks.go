@@ -1,11 +1,12 @@
 package etcd
 
 import (
+	"github.com/giantswarm/etcd-backup/metrics"
 	"github.com/giantswarm/microerror"
 	"time"
 )
 
-func FullBackup(b BackupInterface) error {
+func FullBackup(b BackupInterface) (error, *metrics.BackupMetrics) {
 	var err error
 
 	version := b.Version()
@@ -14,7 +15,7 @@ func FullBackup(b BackupInterface) error {
 
 	err = b.Create()
 	if err != nil {
-		return microerror.Maskf(err, "Etcd %s creation failed: %s", version, err)
+		return microerror.Maskf(err, "Etcd %s creation failed: %s", version, err), nil
 	}
 
 	creationTime := time.Since(start).Milliseconds()
@@ -36,10 +37,5 @@ func FullBackup(b BackupInterface) error {
 
 	uploadTime := time.Since(start).Milliseconds()
 
-	err = b.SendMetrics(creationTime, encryptionTime, uploadTime, size)
-	if err != nil {
-		microerror.Maskf(err, "Etcd %s metrics push failed: %s", version, err)
-	}
-
-	return nil
+	return nil, metrics.NewSuccessfulBackupMetrics(size, creationTime, encryptionTime, uploadTime)
 }
