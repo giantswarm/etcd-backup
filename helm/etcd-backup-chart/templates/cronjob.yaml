@@ -77,5 +77,6 @@ spec:
           # Do not restart pod, job takes care on restarting failed pod.
           restartPolicy: Never
           hostNetwork: true
+          dnsPolicy: ClusterFirstWithHostNet
           imagePullSecrets:
           - name: etcd-backup-pull-secret
