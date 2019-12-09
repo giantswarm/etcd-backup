@@ -46,6 +46,10 @@ spec:
             - -etcd-v3-key=/certs/{{ .Values.Installation.V1.Infra.EtcdBackup.ClientKeyFileName }}
             - -aws-s3-bucket={{ .Values.Installation.V1.Infra.EtcdBackup.S3Bucket }}
             - -aws-s3-region={{ .Values.Installation.V1.Infra.EtcdBackup.S3Region }}
+            {{- if and (.Values.Installation.V1.Infra.EtcdBackup.PushgatewayJob | default "") (.Values.Installation.V1.Infra.EtcdBackup.PushgatewayURL | default "") }}
+            - -prometheus-url={{ .Values.Installation.V1.Infra.EtcdBackup.PushgatewayURL | quote }}
+            - -prometheus-job={{ .Values.Installation.V1.Infra.EtcdBackup.PushgatewayJob | quote }}
+            {{- end }}
             volumeMounts:
             - mountPath: /var/lib/etcd
               name: etcd-datadir
