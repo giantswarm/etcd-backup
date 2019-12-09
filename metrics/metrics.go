@@ -39,7 +39,7 @@ var (
 	}, labels)
 )
 
-func Send(prometheusConfig *config.PrometheusConfig, metrics *BackupMetrics, tenantClusterName string) error {
+func Send(prometheusConfig *config.PrometheusConfig, metrics *BackupMetrics, tenantClusterName string) (bool, error) {
 	// prometheus URL might be empty, in that case we can't push any metric
 	if prometheusConfig.Url != "" {
 		registry := prometheus.NewRegistry()
@@ -60,7 +60,7 @@ func Send(prometheusConfig *config.PrometheusConfig, metrics *BackupMetrics, ten
 			successCounter.With(labels).Inc()
 
 			if err := pusher.Add(); err != nil {
-				return err
+				return true, err
 			}
 		} else {
 			// failed backup
@@ -70,10 +70,11 @@ func Send(prometheusConfig *config.PrometheusConfig, metrics *BackupMetrics, ten
 			failureCounter.With(labels).Inc()
 
 			if err := pusher.Add(); err != nil {
-				return err
+				return true, err
 			}
 		}
+		return true, nil
 	}
 
-	return nil
+	return false, nil
 }

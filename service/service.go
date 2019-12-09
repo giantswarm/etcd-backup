@@ -124,7 +124,18 @@ func (s *Service) BackupHostCluster() error {
 
 		s.Logger.Log("level", "info", "msg", "Cluster backup created for: "+v3.Prefix)
 
-		metrics.Send(s.PrometheusConfig, backupMetrics, "")
+		sent, err := metrics.Send(s.PrometheusConfig, backupMetrics, "")
+
+		if sent {
+			if err != nil {
+				s.Logger.Log("level", "info", "msg", fmt.Sprintf("Error sending metrics to push gateway for: %s (%s)", v3.Prefix, err))
+			} else {
+				s.Logger.Log("level", "info", "msg", "Successfully sent metrics to push gateway for: "+v3.Prefix)
+			}
+		} else {
+			s.Logger.Log("level", "info", "msg", "Did NOT send metrics to push gateway for: "+v3.Prefix)
+		}
+
 		return nil
 	}
 
