@@ -107,6 +107,7 @@ func uploadToS3(fpath string, p config.AWSConfig, logger micrologger.Logger) (in
 
 	obj, err := svc.GetObject(pms)
 	if err != nil {
+		logger.Log("level", "warning", "msg", fmt.Sprintf("Unable to get uploaded object: %s", err))
 		return -1, microerror.Mask(err)
 	}
 
