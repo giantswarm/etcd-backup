@@ -46,9 +46,9 @@ spec:
             - -etcd-v3-key=/certs/{{ .Values.Installation.V1.Infra.EtcdBackup.ClientKeyFileName }}
             - -aws-s3-bucket={{ .Values.Installation.V1.Infra.EtcdBackup.S3Bucket }}
             - -aws-s3-region={{ .Values.Installation.V1.Infra.EtcdBackup.S3Region }}
-            {{- if and (.Values.Installation.V1.Infra.EtcdBackup.PushgatewayJob | default "") (.Values.Installation.V1.Infra.EtcdBackup.PushgatewayURL | default "") }}
-            - -prometheus-url={{ .Values.Installation.V1.Infra.EtcdBackup.PushgatewayURL | quote }}
-            - -prometheus-job={{ .Values.Installation.V1.Infra.EtcdBackup.PushgatewayJob | quote }}
+            {{- if and (.Values.Installation.V1.Secret.EtcdBackup.PushgatewayJob | default "") (.Values.Installation.V1.Secret.EtcdBackup.PushgatewayURL | default "") }}
+            - -prometheus-url={{ .Values.Installation.V1.Secret.EtcdBackup.PushgatewayURL | quote }}
+            - -prometheus-job={{ .Values.Installation.V1.Secret.EtcdBackup.PushgatewayJob | quote }}
             {{- end }}
             volumeMounts:
             - mountPath: /var/lib/etcd
@@ -71,10 +71,6 @@ spec:
                   secretKeyRef:
                     name: etcd-backup
                     key: ETCDBACKUP_PASSPHRASE
-              - name: JOB
-                value: {{ .Values.Installation.V1.Infra.EtcdBackup.PushgatewayJob | quote }}
-              - name: URL
-                value: {{ .Values.Installation.V1.Infra.EtcdBackup.PushgatewayURL | quote }}
           volumes:
           - name: etcd-datadir
             hostPath:
