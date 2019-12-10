@@ -71,6 +71,10 @@ spec:
                   secretKeyRef:
                     name: etcd-backup
                     key: ETCDBACKUP_PASSPHRASE
+              - name: JOB
+                value: {{ .Values.Installation.V1.Infra.EtcdBackup.PushgatewayJob | quote }}
+              - name: URL
+                value: {{ .Values.Installation.V1.Infra.EtcdBackup.PushgatewayURL | quote }}
           volumes:
           - name: etcd-datadir
             hostPath:
