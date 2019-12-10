@@ -100,18 +100,7 @@ func uploadToS3(fpath string, p config.AWSConfig, logger micrologger.Logger) (in
 
 	logger.Log("level", "info", "msg", fmt.Sprintf("AWS S3: object %s successfully uploaded to bucket %s", path, p.Bucket))
 
-	pms := &s3.GetObjectInput{
-		Bucket: aws.String(p.Bucket),
-		Key:    aws.String(path),
-	}
-
-	obj, err := svc.GetObject(pms)
-	if err != nil {
-		logger.Log("level", "warning", "msg", fmt.Sprintf("Unable to get uploaded object: %s", err))
-		return -1, microerror.Mask(err)
-	}
-
-	return *obj.ContentLength, nil
+	return size, nil
 }
 
 // Encrypt data with passphrase.
