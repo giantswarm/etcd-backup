@@ -57,12 +57,12 @@ func execCmd(cmd string, args []string, envs []string, logger micrologger.Logger
 // Arguments:
 // - fpath - full path to target file
 // - p     - paramsAWS struct with AWS keys and bucket name
-func uploadToS3(fpath string, p config.AWSConfig, logger micrologger.Logger) error {
+func uploadToS3(fpath string, p config.AWSConfig, logger micrologger.Logger) (int64, error) {
 	// Login to AWS S3
 	creds := credentials.NewStaticCredentials(p.AccessKey, p.SecretKey, "")
 	_, err := creds.Get()
 	if err != nil {
-		return microerror.Mask(err)
+		return -1, microerror.Mask(err)
 	}
 	cfg := aws.NewConfig().WithRegion(p.Region).WithCredentials(creds)
 	svc := s3.New(session.New(), cfg)
@@ -70,14 +70,14 @@ func uploadToS3(fpath string, p config.AWSConfig, logger micrologger.Logger) err
 	// Upload.
 	file, err := os.Open(fpath)
 	if err != nil {
-		return microerror.Mask(err)
+		return -1, microerror.Mask(err)
 	}
 	defer file.Close()
 
 	// Get file size.
 	fileInfo, err := file.Stat()
 	if err != nil {
-		return microerror.Mask(err)
+		return -1, microerror.Mask(err)
 	}
 	size := fileInfo.Size()
 
@@ -95,11 +95,12 @@ func uploadToS3(fpath string, p config.AWSConfig, logger micrologger.Logger) err
 	// Put object to S3.
 	_, err = svc.PutObject(params)
 	if err != nil {
-		return microerror.Mask(err)
+		return -1, microerror.Mask(err)
 	}
 
 	logger.Log("level", "info", "msg", fmt.Sprintf("AWS S3: object %s successfully uploaded to bucket %s", path, p.Bucket))
-	return nil
+
+	return size, nil
 }
 
 // Encrypt data with passphrase.

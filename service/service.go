@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"github.com/giantswarm/etcd-backup/metrics"
 	"time"
 
 	"github.com/giantswarm/backoff"
@@ -14,18 +15,19 @@ import (
 type Service struct {
 	Logger micrologger.Logger
 
-	AwsAccessKey    string
-	AwsSecretKey    string
-	AwsS3Bucket     string
-	AwsS3Region     string
-	EtcdV2DataDir   string
-	EtcdV3Cert      string
-	EtcdV3CACert    string
-	EtcdV3Key       string
-	EtcdV3Endpoints string
-	EncryptPass     string
-	Prefix          string
-	Provider        string
+	AwsAccessKey     string
+	AwsSecretKey     string
+	AwsS3Bucket      string
+	AwsS3Region      string
+	EtcdV2DataDir    string
+	EtcdV3Cert       string
+	EtcdV3CACert     string
+	EtcdV3Key        string
+	EtcdV3Endpoints  string
+	EncryptPass      string
+	Prefix           string
+	Provider         string
+	PrometheusConfig *config.PrometheusConfig
 
 	Help   bool
 	SkipV2 bool
@@ -47,6 +49,10 @@ func CreateService(f config.Flags, logger micrologger.Logger) *Service {
 		EtcdV3Endpoints: f.EtcdV3Endpoints,
 		Prefix:          f.Prefix,
 		Provider:        f.Provider,
+		PrometheusConfig: &config.PrometheusConfig{
+			Job: f.PushGatewayJob,
+			Url: f.PushGatewayURL,
+		},
 
 		SkipV2: f.SkipV2,
 	}
@@ -80,9 +86,12 @@ func (s *Service) BackupHostCluster() error {
 			TmpDir:  tmpDir,
 		}
 		// run backup task
-		err = etcd.FullBackup(&v2)
+		err, backupMetrics := etcd.FullBackup(&v2)
 		if err != nil {
+			metrics.Send(s.PrometheusConfig, metrics.NewFailureMetrics(), "")
 			return microerror.Mask(err)
+		} else {
+			metrics.Send(s.PrometheusConfig, backupMetrics, "")
 		}
 	}
 
@@ -108,12 +117,25 @@ func (s *Service) BackupHostCluster() error {
 	// run backup task
 	o := func() error {
 
-		err = etcd.FullBackup(&v3)
+		err, backupMetrics := etcd.FullBackup(&v3)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
 		s.Logger.Log("level", "info", "msg", "Cluster backup created for: "+v3.Prefix)
+
+		sent, err := metrics.Send(s.PrometheusConfig, backupMetrics, "")
+
+		if sent {
+			if err != nil {
+				s.Logger.Log("level", "info", "msg", fmt.Sprintf("Error sending metrics to push gateway for: %s (%s)", v3.Prefix, err))
+			} else {
+				s.Logger.Log("level", "info", "msg", "Successfully sent metrics to push gateway for: "+v3.Prefix)
+			}
+		} else {
+			s.Logger.Log("level", "info", "msg", "Did NOT send metrics to push gateway for: "+v3.Prefix)
+		}
+
 		return nil
 	}
 
@@ -121,6 +143,7 @@ func (s *Service) BackupHostCluster() error {
 
 	err = backoff.Retry(o, b)
 	if err != nil {
+		metrics.Send(s.PrometheusConfig, metrics.NewFailureMetrics(), "")
 		return microerror.Mask(err)
 	}
 
@@ -214,12 +237,15 @@ func (s *Service) BackupGuestClusters() error {
 
 		o := func() error {
 
-			err = etcd.FullBackup(&backupConfig)
+			err, backupMetrics := etcd.FullBackup(&backupConfig)
 			if err != nil {
 				return microerror.Mask(err)
 			}
 
 			s.Logger.Log("level", "info", "msg", "Cluster backup created for: "+clusterID)
+
+			metrics.Send(s.PrometheusConfig, backupMetrics, clusterID)
+
 			return nil
 		}
 
@@ -229,6 +255,7 @@ func (s *Service) BackupGuestClusters() error {
 		if err != nil {
 			failed = true
 			s.Logger.Log("level", "error", "msg", "Failed to backup etcd cluster "+clusterID, "reason", err)
+			metrics.Send(s.PrometheusConfig, metrics.NewFailureMetrics(), clusterID)
 		}
 	}
 

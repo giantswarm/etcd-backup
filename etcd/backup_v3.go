@@ -10,16 +10,15 @@ import (
 )
 
 type EtcdBackupV3 struct {
-	Logger micrologger.Logger
-
 	Aws       config.AWSConfig
-	Prefix    string
-	Filename  string
-	Cert      string
 	CACert    string
-	Key       string
-	Endpoints string
+	Cert      string
 	EncPass   string
+	Endpoints string
+	Filename  string
+	Logger    micrologger.Logger
+	Key       string
+	Prefix    string
 	TmpDir    string
 }
 
@@ -94,17 +93,17 @@ func (b *EtcdBackupV3) Encrypt() error {
 }
 
 // Upload resulted etcd to S3.
-func (b *EtcdBackupV3) Upload() error {
+func (b *EtcdBackupV3) Upload() (int64, error) {
 	fpath := filepath.Join(b.TmpDir, b.Filename)
 
 	// Upload.
-	err := uploadToS3(fpath, b.Aws, b.Logger)
+	size, err := uploadToS3(fpath, b.Aws, b.Logger)
 	if err != nil {
-		return microerror.Mask(err)
+		return -1, microerror.Mask(err)
 	}
 
 	b.Logger.Log("level", "info", "msg", "Etcd v3 backup uploaded successfully")
-	return nil
+	return size, nil
 }
 
 func (b *EtcdBackupV3) Version() string {

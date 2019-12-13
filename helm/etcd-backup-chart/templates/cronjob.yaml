@@ -46,6 +46,10 @@ spec:
             - -etcd-v3-key=/certs/{{ .Values.Installation.V1.Infra.EtcdBackup.ClientKeyFileName }}
             - -aws-s3-bucket={{ .Values.Installation.V1.Infra.EtcdBackup.S3Bucket }}
             - -aws-s3-region={{ .Values.Installation.V1.Infra.EtcdBackup.S3Region }}
+            {{- if and (.Values.Installation.V1.Secret.EtcdBackup.PushgatewayJob | default "") (.Values.Installation.V1.Secret.EtcdBackup.PushgatewayURL | default "") }}
+            - -prometheus-url={{ .Values.Installation.V1.Secret.EtcdBackup.PushgatewayURL }}
+            - -prometheus-job={{ .Values.Installation.V1.Secret.EtcdBackup.PushgatewayJob }}
+            {{- end }}
             volumeMounts:
             - mountPath: /var/lib/etcd
               name: etcd-datadir
@@ -77,5 +81,6 @@ spec:
           # Do not restart pod, job takes care on restarting failed pod.
           restartPolicy: Never
           hostNetwork: true
+          dnsPolicy: ClusterFirstWithHostNet
           imagePullSecrets:
           - name: etcd-backup-pull-secret
