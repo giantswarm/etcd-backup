@@ -32,7 +32,7 @@ spec:
           serviceAccountName: etcd-backup
           containers:
           - name: etcd-backup
-            image: quay.io/giantswarm/etcd-backup:[[ .SHA ]]
+            image: {{ .Values.Installation.V1.Registry.Domain }}/giantswarm/etcd-backup:[[ .SHA ]]
             args:
             # backup guest clusters only on production instalations
             # testing installation can have many broken guest clusters

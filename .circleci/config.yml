@@ -10,8 +10,37 @@ jobs:
         chmod +x ./architect
         ./architect version
     - run: ./architect build
+    - persist_to_workspace:
+        root: .
+        paths:
+        - ./etcd-backup
+        - ./architect
+  deploy:
+    machine: true
+    steps:
+    - checkout
+    - attach_workspace:
+        at: .
     - deploy:
         command: |
-          if [ "${CIRCLE_BRANCH}" == "master" ]; then
             ./architect deploy
-          fi
+
+workflows:
+  build_e2e:
+    jobs:
+      - build
+      - architect/push-to-docker-legacy:
+          name: push-etcd-backup-to-aliyun
+          image: "registry-intl.cn-shanghai.aliyuncs.com/giantswarm/etcd-backup"
+          username_envar: "ALIYUN_USERNAME"
+          password_envar: "ALIYUN_PASSWORD"
+          # Push to Aliyun should execute for non-master branches only once manually approved.
+          requires:
+            - build
+      - deploy:
+          name: deploy
+          requires:
+            - push-etcd-backup-to-aliyun
+          filters:
+            branches:
+              only: master
